@@ -1,20 +1,10 @@
-0 silly argv {
-0 silly argv   _: [ 'import' ],
-0 silly argv   lernaVersion: '4.0.0',
-0 silly argv   '$0': 'lerna',
-0 silly argv   dir: '/Users/cameron/Rally/cli'
-0 silly argv }
+0 silly argv { _: [ 'import' ], lernaVersion: '4.0.0', '$0': 'lerna', dir: '../ts' }
 1 notice cli v4.0.0
 2 verbose rootPath /Users/cameron/Rally/rly-ts
-3 error Error: Command failed with exit code 128: git rev-parse HEAD
-3 error fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
-3 error Use '--' to separate paths from revisions, like this:
-3 error 'git <command> [<revision>...] -- [<file>...]'
-3 error HEAD
+3 error Error: Command failed with exit code 128: git log --format=%h
+3 error fatal: your current branch 'master' does not have any commits yet
 3 error     at makeError (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/execa/lib/error.js:60:11)
 3 error     at Function.module.exports.sync (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/execa/index.js:194:17)
 3 error     at Object.execSync (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/child-process/index.js:39:16)
-3 error     at ImportCommand.execSync (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/import/index.js:141:25)
-3 error     at ImportCommand.getCurrentSHA (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/import/index.js:133:17)
-3 error     at ImportCommand.initialize (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/import/index.js:102:31)
-3 error     at /Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/command/index.js:274:24
+3 error     at ImportCommand.externalExecSync (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/import/index.js:145:25)
+3 error     at ImportCommand.initialize (/Users/cameron/.nvm/versions/node/v16.4.1/lib/node_modules/lerna/node_modules/@lerna/import/index.js:82:25)
