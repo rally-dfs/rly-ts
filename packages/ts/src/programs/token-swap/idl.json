@@ -1,0 +1,641 @@
+{
+    "version": "0.0.0",
+    "name": "token_bonding_curve",
+    "instructions": [
+        {
+            "name": "initializeConstantPrice",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenA",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenB",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "pool",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "fee",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "tradeFeeNumerator",
+                    "type": "u64"
+                },
+                {
+                    "name": "tradeFeeDenominator",
+                    "type": "u64"
+                },
+                {
+                    "name": "ownerTradeFeeNumerator",
+                    "type": "u64"
+                },
+                {
+                    "name": "ownerTradeFeeDenominator",
+                    "type": "u64"
+                },
+                {
+                    "name": "ownerWithdrawFeeNumerator",
+                    "type": "u64"
+                },
+                {
+                    "name": "ownerWithdrawFeeDenominator",
+                    "type": "u64"
+                },
+                {
+                    "name": "hostFeeNumerator",
+                    "type": "u64"
+                },
+                {
+                    "name": "hostFeeDenominator",
+                    "type": "u64"
+                },
+                {
+                    "name": "tokenBPrice",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "initializeLinearPrice",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenA",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenB",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "pool",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "fee",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "slopeNumerator",
+                    "type": "u64"
+                },
+                {
+                    "name": "slopeDenominator",
+                    "type": "u64"
+                },
+                {
+                    "name": "initialTokenAPriceNumerator",
+                    "type": "u64"
+                },
+                {
+                    "name": "initialTokenAPriceDenominator",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "swap",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "userTransferAuthority",
+                    "isMut": false,
+                    "isSigner": true
+                },
+                {
+                    "name": "source",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapSource",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapDestination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "poolMint",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "poolFee",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "amountIn",
+                    "type": "u64"
+                },
+                {
+                    "name": "minimumAmountOut",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "depositAllTokenTypes",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "userTransferAuthority",
+                    "isMut": false,
+                    "isSigner": true
+                },
+                {
+                    "name": "sourceA",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "sourceB",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenA",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenB",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "poolMint",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "poolTokenAmount",
+                    "type": "u64"
+                },
+                {
+                    "name": "maximumTokenAAmount",
+                    "type": "u64"
+                },
+                {
+                    "name": "maximumTokenBAmount",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "withdrawAllTokenTypes",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "userTransferAuthority",
+                    "isMut": false,
+                    "isSigner": true
+                },
+                {
+                    "name": "poolMint",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "source",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapTokenA",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapTokenB",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destinationTokenA",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destinationTokenB",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "feeAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "poolTokenAmount",
+                    "type": "u64"
+                },
+                {
+                    "name": "minimumTokenAAmount",
+                    "type": "u64"
+                },
+                {
+                    "name": "minimumTokenBAmount",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "depositSingleTokenTypeExactAmountIn",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "userTransferAuthority",
+                    "isMut": false,
+                    "isSigner": true
+                },
+                {
+                    "name": "sourceToken",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapTokenA",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapTokenB",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "poolMint",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "sourceTokenAmount",
+                    "type": "u64"
+                },
+                {
+                    "name": "minimumPoolTokenAmount",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "withdrawSingleTokenTypeExactAmountOut",
+            "accounts": [
+                {
+                    "name": "tokenSwap",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapAuthority",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "userTransferAuthority",
+                    "isMut": false,
+                    "isSigner": true
+                },
+                {
+                    "name": "poolMint",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "poolTokenSource",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapTokenA",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "swapTokenB",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "destination",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "poolFeeAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "destinationTokenAmount",
+                    "type": "u64"
+                },
+                {
+                    "name": "maximumPoolTokenAmount",
+                    "type": "u64"
+                }
+            ]
+        }
+    ],
+    "types": [
+        {
+            "name": "CurveType",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "ConstantProduct"
+                    },
+                    {
+                        "name": "ConstantPrice"
+                    },
+                    {
+                        "name": "Stable"
+                    },
+                    {
+                        "name": "Offset"
+                    },
+                    {
+                        "name": "LinearPrice"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "TradeDirection",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "AtoB"
+                    },
+                    {
+                        "name": "BtoA"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "RoundDirection",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Floor"
+                    },
+                    {
+                        "name": "Ceiling"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "SwapError",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "AlreadyInUse"
+                    },
+                    {
+                        "name": "InvalidProgramAddress"
+                    },
+                    {
+                        "name": "InvalidOwner"
+                    },
+                    {
+                        "name": "InvalidOutputOwner"
+                    },
+                    {
+                        "name": "ExpectedMint"
+                    },
+                    {
+                        "name": "ExpectedAccount"
+                    },
+                    {
+                        "name": "EmptySupply"
+                    },
+                    {
+                        "name": "InvalidSupply"
+                    },
+                    {
+                        "name": "InvalidDelegate"
+                    },
+                    {
+                        "name": "InvalidInput"
+                    },
+                    {
+                        "name": "IncorrectSwapAccount"
+                    },
+                    {
+                        "name": "IncorrectPoolMint"
+                    },
+                    {
+                        "name": "InvalidOutput"
+                    },
+                    {
+                        "name": "CalculationFailure"
+                    },
+                    {
+                        "name": "InvalidInstruction"
+                    },
+                    {
+                        "name": "RepeatedMint"
+                    },
+                    {
+                        "name": "ExceededSlippage"
+                    },
+                    {
+                        "name": "InvalidCloseAuthority"
+                    },
+                    {
+                        "name": "InvalidFreezeAuthority"
+                    },
+                    {
+                        "name": "IncorrectFeeAccount"
+                    },
+                    {
+                        "name": "ZeroTradingTokens"
+                    },
+                    {
+                        "name": "FeeCalculationFailure"
+                    },
+                    {
+                        "name": "ConversionFailure"
+                    },
+                    {
+                        "name": "InvalidFee"
+                    },
+                    {
+                        "name": "IncorrectTokenProgramId"
+                    },
+                    {
+                        "name": "UnsupportedCurveType"
+                    },
+                    {
+                        "name": "InvalidCurve"
+                    },
+                    {
+                        "name": "UnsupportedCurveOperation"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "SwapVersion",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "SwapV1"
+                    }
+                ]
+            }
+        }
+    ]
+}
