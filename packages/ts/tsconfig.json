@@ -1,9 +1,7 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "types": [
-            "mocha",
-            "chai"
-        ],
+        "outDir": "./lib",
         "typeRoots": [
             "./node_modules/@types"
         ],
@@ -13,8 +11,9 @@
         "module": "commonjs",
         "target": "es6",
         "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "declaration": true,
-        "outDir": "./../build"
-    }
+        "resolveJsonModule": true
+    },
+    "include": [
+        "./src"
+    ]
 }

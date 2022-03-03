@@ -18,7 +18,7 @@ import {
     executeSwap,
     tokenSwapProgram,
     getTokenSwapInfo,
-} from 'dfs-js';
+} from '@rly/js';
 
 
 import { loadKeypair, getProvider, getOrCreateAssociatedAccount } from "./utils/utils"
@@ -186,7 +186,9 @@ program
         const associatedTokenAcct = await canv1.getOrCreateAssociatedAccountInfo(wallet.publicKey);
         const { amount } = await canv1.getAccountInfo(associatedTokenAcct.address);
 
-        console.log(`balance = ${amount.div(ten.pow(new BN(decimals))).toNumber()} in ${associatedTokenAcct.address}`);
+        const canBalance = new BN(amount);
+
+        console.log(`balance = ${canBalance.div(ten.pow(new BN(decimals))).toNumber()} in ${associatedTokenAcct.address}`);
 
     });
 
@@ -208,9 +210,9 @@ program
         const { decimals } = await whv2.getMintInfo()
         const associatedTokenAcct = await whv2.getOrCreateAssociatedAccountInfo(wallet.publicKey);
         const { amount } = await whv2.getAccountInfo(associatedTokenAcct.address);
+        const wormBal = new BN(amount);
 
-
-        console.log(`balance = ${amount.div(ten.pow(new BN(decimals))).toNumber()} in ${associatedTokenAcct.address}`);
+        console.log(`balance = ${wormBal.div(ten.pow(new BN(decimals))).toNumber()} in ${associatedTokenAcct.address}`);
 
     });
 
@@ -260,7 +262,9 @@ program
         const wormholeTokenAccount = wormhole_token_account ? new PublicKey(wormhole_token_account) : await getOrCreateAssociatedAccount(wormholeToken, wallet.payer.publicKey);
         const canonicalTokenAccount = canonical_token_account ? new PublicKey(canonical_token_account) : await getOrCreateAssociatedAccount(canonicalToken, wallet.payer.publicKey);
 
-        let { amount: canBalance } = await canonicalToken.getAccountInfo(canonicalTokenAccount);
+        let { amount: canAmount } = await canonicalToken.getAccountInfo(canonicalTokenAccount);
+
+        const canBalance = new BN(canAmount);
 
         const balance = canBalance.div(ten.pow(new BN(canDec))).toNumber();
 
@@ -340,9 +344,11 @@ program
         const canonicalTokenAccount = canonical_token_account ? new PublicKey(canonical_token_account) : await getOrCreateAssociatedAccount(canonicalToken, wallet.payer.publicKey);
 
 
-        let { amount: wormBalance } = await wormholeToken.getAccountInfo(wormholeTokenAccount);
+        let { amount: wormAmount } = await wormholeToken.getAccountInfo(wormholeTokenAccount);
 
-        const balance = wormBalance.div(ten.pow(new BN(wormDec))).toNumber();
+        const wormBal = new BN(wormAmount)
+
+        const balance = wormBal.div(ten.pow(new BN(wormDec))).toNumber();
 
         if (balance < Number(amount)) {
             return console.log(`insufficent funds, your wormhole $RLY balance is currently ${balance} `)

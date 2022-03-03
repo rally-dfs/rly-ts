@@ -8,11 +8,11 @@ import { loadKeypair } from "../src/utils/utils"
 const { Keypair, Connection, clusterApiUrl } = web3;
 
 const test = (command, args) => {
-    return execSync(`npx ts-node src/dfs-cli.ts ${command} ${args}`).toString();
+    return execSync(`npx ts-node src/rly-cli.ts ${command} ${args}`).toString();
 };
 
 
-describe("dfs-cli", () => {
+describe("rly-cli", () => {
 
     let connection;
     let wallet;
