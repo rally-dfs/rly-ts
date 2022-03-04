@@ -1,6 +1,0 @@
-46 error Error: Command failed with exit code 128: git tag v0.0.1 -m v0.0.1
-46 error fatal: tag 'v0.0.1' already exists
-46 error     at makeError (/Users/cameron/Rally/rly-ts/node_modules/execa/lib/error.js:60:11)
-46 error     at handlePromise (/Users/cameron/Rally/rly-ts/node_modules/execa/index.js:118:26)
-46 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
-46 error     at async Promise.all (index 0)
