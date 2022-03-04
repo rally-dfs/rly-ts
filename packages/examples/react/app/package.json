@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "rly-test-app",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -22,7 +22,8 @@
     "dfs-js": "^1.0.6",
     "next": "12.0.10",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "@rly/js": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "17.0.17",

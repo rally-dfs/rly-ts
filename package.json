@@ -1,6 +1,11 @@
 {
-  "name": "root",
+  "name": "rly",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "packages/examples/**"
+  ],
+  "npmClient": "npm",
   "devDependencies": {
     "@types/node": "^17.0.21",
     "lerna": "^4.0.0",
