@@ -148,7 +148,46 @@ Options:
 
 ## Initilialize token bonding curve
 
+This command allows you to set up a token bonding curve
+
 `rly-cli init-tbc`
 
+```
+Usage: rly-cli tbc-init [options] <token_a> <token_b> <token_b_liquidit>
 
-Coming Soon!
+Arguments:
+  token_a                              token A
+  token_b                              token B
+  token_b_liquidit                     token B liquidity
+
+Options:
+  -e, --env <string>                   Solana cluster env name (default: "devnet")
+  -k, --keypair <path>                 Solana wallet location (default: "--keypair not provided")
+  --slope_numerator <string>           slope numerator
+  --slope_denominator <string>         slope denominator
+  --init_price_a_numerator <string>    initial price token A
+  --init_price_a_denominator <string>  initial price token B
+  -h, --help                           display help for command
+```
+
+## Swap tokens on bonding curve 
+
+This command allows you to swap two tokens on an initialized bonding curve
+
+```
+Usage: rly-cli tbc-swap [options] <swap> <token_a> <token_b> <amount>
+
+Arguments:
+  swap                  swap
+  token_a               token A
+  token_b               token B
+  amount                amount of token a to swap
+
+Options:
+  -e, --env <string>    Solana cluster env name (default: "devnet")
+  -k, --keypair <path>  Solana wallet location (default: "--keypair not provided")
+  -h, --help            display help for command
+
+```
+
+
