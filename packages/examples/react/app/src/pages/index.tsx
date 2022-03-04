@@ -4,6 +4,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { AppBar, Toolbar, Typography, Divider, GlobalStyles, CssBaseline, Container, Alert } from '@mui/material';
 import { indexCopy } from '../config'
+import { Wallet } from '@metaplex/js';
 
 import CreateToken from '../components/CreateToken'
 import InitTbc from '../components/InitTbc';
