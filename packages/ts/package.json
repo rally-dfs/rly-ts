@@ -1,5 +1,5 @@
 {
-  "name": "@rly/js",
+  "name": "rly-js",
   "version": "0.0.0",
   "description": "",
   "main": "lib/src/index.js",
@@ -44,5 +44,5 @@
     "ts-mocha": "^8.0.0",
     "typescript": "^4.5.4"
   },
-  "gitHead": "dcff28196cf47cbc7c98461521db0a2b397be26a"
+  "gitHead": "c26985a04f38d6a9e2d5e719e1bddfbbab9cd493"
 }
