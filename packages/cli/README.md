@@ -1,15 +1,15 @@
 
-# DFS CLI 
+# RLY CLI 
 
-DFS CLI allows you to setup fungilble SPL tokens and call Rally token programs from the command line. 
+RLY CLI allows you to setup fungilble SPL tokens and call Rally token programs from the command line. 
 
 ## installation 
 
-`npm i -g dfs-cli`
+`npm i -g rly-cli`
 
 or 
 
-`yarn global add dfs-cli`
+`yarn global add rly-cli`
 
 ## general
 
@@ -18,7 +18,7 @@ The --keypair option on all commands points to a solana keypair file stored in y
 
 ## create token
 
-`dfs-cli create token`
+`rly-cli create token`
 
 This command can be used on any of the solana networks (mainnet-beta, devnet, testnet). This will create a token and decorate the token mint with metadata per the metaplex metadata standard. The token can be set up with an initial supply which is minted to the associated token account for the keypair creating the token. 
 
@@ -26,7 +26,7 @@ TODO: allow user to specify destination address of initial supply
 
 
 ```
-Usage: dfs-cli create-token [options]
+Usage: rly-cli create-token [options]
 
 Options:
   -e, --env <string>     Solana cluster env name (default:
@@ -45,10 +45,10 @@ Options:
 
 This command can be used on any of the solana networks (mainnet-beta, devnet, testnet). This command will add a metadata decorator to the specified token mint per the metaplex metadata standard. 
 
-`npx ts-node src/token-cli add-metadata`
+`npx ts-node src/rly-cli add-metadata`
 
 ```
-Usage: token-cli add-metadata [options] <mint>
+Usage: rly-cli add-metadata [options] <mint>
 
 Arguments:
   mint                   token mint
@@ -66,10 +66,10 @@ Options:
 
 This command can be used on any of the solana networks (mainnet-beta, devnet, testnet). This command returns information about the token account (supply, authority, decimals) and the tokens metadata. Use this to verify the token metadata after adding metadata above.
 
-`dfs-cli get-token-info`
+`rly-cli get-token-info`
 
 ```
-Usage: dfs-cli get-token-info [options] <mint>
+Usage: rly-cli get-token-info [options] <mint>
 
 Arguments:
   mint                  token mint
@@ -85,10 +85,10 @@ This command will only work on mainnet-beta as it queries the token mint for can
 
 TODO: allow user to specify address to lookup, rather than just the associated token account
 
-`dfs-cli get-balance-canonical`
+`rly-cli get-balance-canonical`
 
 ```
-Usage: dfs-cli get-balance-canonical [options]
+Usage: rly-cli get-balance-canonical [options]
 
 Options:
   -k, --keypair <path>  Solana wallet location (default: "--keypair not provided")
@@ -101,10 +101,10 @@ This command will only work on mainnet-beta as it queries the token mint for wor
 
 TODO: allow user to specify address to lookup, rather than just the associated token account
 
-`dfs-cli get-balance-wormhole`
+`rly-cli get-balance-wormhole`
 
 ```
-Usage: dfs-cli get-balance-wormhole [options]
+Usage: rly-cli get-balance-wormhole [options]
 
 Options:
   -k, --keypair <path>  Solana wallet location (default: "--keypair not provided")
@@ -116,10 +116,10 @@ Options:
 
 This command will only work on mainnet-beta as it swaps between the wormhole and canonical rally token mints on mainnet beta. This allows you to specify an amount to swap and optionally can specify a canonical token account and a wormhole token account, if the token accounts are not specified the associated token accounts with the specified keypairs will be used.
 
-` dfs-cli swap-wormhole-canonical`
+` rly-cli swap-wormhole-canonical`
 
 ```
-Usage: dfs-cli swap-wormhole-canonical [options]
+Usage: rly-cli swap-wormhole-canonical [options]
 
 Options:
   -a, --amount <number>                   amount
@@ -133,10 +133,10 @@ Options:
 
 This command will only work on mainnet-beta as it swaps between the wormhole and canonical rally token mints on mainnet beta. This allows you to specify an amount to swap and optionally can specify a canonical token account and a wormhole token account, if the token accounts are not specified the associated token accounts with the specified keypairs will be used.
 
-` dfs-cli swap-canonical-wormhole`
+` rly-cli swap-canonical-wormhole`
 
 ```
-Usage: dfs-cli swap-canonical-wormhole [options]
+Usage: rly-cli swap-canonical-wormhole [options]
 
 Options:
   -a, --amount <string>                   amount
@@ -148,7 +148,7 @@ Options:
 
 ## Initilialize token bonding curve
 
-`dfs-cli init-tbc`
+`rly-cli init-tbc`
 
 
 Coming Soon!
