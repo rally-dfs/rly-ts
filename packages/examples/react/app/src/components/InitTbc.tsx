@@ -5,7 +5,7 @@ import { Button, Grid, TextField, Typography, Box, Stack, Link } from '@mui/mate
 import BN from 'bn.js';
 import { initializeLinearPriceCurve, tokenSwapProgram, getMintInfo } from "rly-js"
 import { Wallet } from '@metaplex/js';
-import { PublicKey, Keypair, Signer } from '@solana/web3.js';
+import { PublicKey, Keypair } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
 import { Provider, web3 } from '@project-serum/anchor';
 import { getAssociatedTokenAddress } from '../utils';
