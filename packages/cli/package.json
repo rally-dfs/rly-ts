@@ -1,6 +1,6 @@
 {
   "name": "@rly/cli",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "",
   "bin": {
     "dfs-cli": "./lib/cli/src/dfs-cli.js"
