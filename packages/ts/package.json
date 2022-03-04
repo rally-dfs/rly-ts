@@ -1,6 +1,6 @@
 {
   "name": "@rly/js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
@@ -44,5 +44,5 @@
     "ts-mocha": "^8.0.0",
     "typescript": "^4.5.4"
   },
-  "gitHead": "c067218bb315ec9cc7c61f3fea1cdfddf69f0fba"
+  "gitHead": "7e7c66db31b06560560bf2effedfba925c39192b"
 }
