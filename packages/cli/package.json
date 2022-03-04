@@ -38,5 +38,6 @@
     "mocha": "^9.2.0",
     "ts-mocha": "^9.0.2",
     "typescript": "^4.5.4"
-  }
+  },
+  "gitHead": "c97da5f3ae34c511e543412cc40df5b736a6e96e"
 }
