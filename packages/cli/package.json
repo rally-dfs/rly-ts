@@ -1,6 +1,6 @@
 {
   "name": "@rly/cli",
-  "version": "0.0.5",
+  "version": "0.0.1",
   "description": "",
   "bin": {
     "dfs-cli": "./lib/cli/src/dfs-cli.js"
@@ -39,5 +39,5 @@
     "ts-mocha": "^9.0.2",
     "typescript": "^4.5.4"
   },
-  "gitHead": "e1d73b58bb9119c0b4a4fcc1a0ea132bdaefc9f1"
+  "gitHead": "465f6004bb1743a7fffb122580d6630c7cab7a42"
 }
