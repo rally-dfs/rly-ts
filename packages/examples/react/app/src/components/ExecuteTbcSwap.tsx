@@ -2,7 +2,7 @@
 import { FC, useState, useEffect } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Button, Grid, TextField, Typography, Box, Stack, Link } from '@mui/material';
-import { executeSwap, estimateSwap, tokenSwapProgram, getTokenSwapInfo, getMintInfo, getTokenAccountInfo } from "@rly/js"
+import { executeSwap, estimateSwap, tokenSwapProgram, getTokenSwapInfo, getMintInfo, getTokenAccountInfo } from "rly-js"
 import { Wallet } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";

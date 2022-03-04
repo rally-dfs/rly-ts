@@ -18,7 +18,7 @@ import {
     executeSwap,
     tokenSwapProgram,
     getTokenSwapInfo,
-} from '@rly/js';
+} from 'rly-js';
 
 
 import { loadKeypair, getProvider, getOrCreateAssociatedAccount } from "./utils/utils"
