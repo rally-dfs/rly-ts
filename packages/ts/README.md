@@ -5,13 +5,13 @@
 Add the package as a dependency to your project:
 
 ```
-$ npm i dfs-js
+$ npm i rly-js
 ```
 
 with yarn
 
 ```
-yarn add i dfs-js
+yarn add i rly-js
 ```
 
 ## Usage

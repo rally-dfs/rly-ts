@@ -1,8 +1,8 @@
 import { web3, BN, Provider } from "@project-serum/anchor"
 import assert from 'assert';
-import { Token, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token';
+import { Token, TOKEN_PROGRAM_ID, u64, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { NodeWallet } from "@metaplex/js";
-import { addMetadata, createToken, getMetadata } from "../src"
+import { addMetadata, createToken, getMetadata, transferToken } from "../src"
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
 
@@ -10,26 +10,51 @@ describe('spl token', () => {
 
     let wallet;
     let connection;
-    const initialSupply = new BN(1_000_000);
+    let tokenMint;
+    let tx
+    const initialSupply = new BN(10_000 * 10 ** 9);
     const name = "TestToken";
     const symbol = "TKNSYMBL";
     const decimals = 9
 
     before(async () => {
         const walletKeyPair = Keypair.generate();
+        const receiver = Keypair.generate();
         connection = new Connection(clusterApiUrl("devnet"))
         wallet = new NodeWallet(walletKeyPair)
         await connection.confirmTransaction(await connection.requestAirdrop(wallet.publicKey, LAMPORTS_PER_SOL))
+        await connection.confirmTransaction(await connection.requestAirdrop(receiver.publicKey, LAMPORTS_PER_SOL))
+
     })
 
 
     it('should create a new spl token with metadata', async () => {
 
-        const { tx, tokenMint } = await createToken({
+        ({ tx, tokenMint } = await createToken({
             initialSupply,
             tokenData: { name, symbol, decimals },
             connection,
             wallet
+        }))
+
+        await connection.confirmTransaction(tx)
+        const data = await getMetadata({ tokenMint, connection })
+        assert.strictEqual(data.name, name);
+        assert.strictEqual(data.symbol, symbol);
+
+    })
+
+    it('should transfer spl token second account', async () => {
+
+        const fromTokenAcct = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, tokenMint.publicKey, wallet.publicKey)
+        const associatedAcctIx = await Token.createAssociatedTokenAccountInstruction(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, tokenMint.publicKey, tokenAccount, wallet.publicKey, wallet.publicKey)
+
+
+
+
+        const tx = await transferToken({
+            from: wallet.publicKey,
+            to: receiver
         })
 
         await connection.confirmTransaction(tx)

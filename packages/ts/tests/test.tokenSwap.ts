@@ -1,12 +1,11 @@
-import {
-    tokenSwapProgram,
-} from "../src"
-import { web3, Provider, BN } from "@project-serum/anchor"
+
 import assert from 'assert';
+
+import { web3, Provider, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
-import { initializeLinearPriceCurve, executeSwap, estimateSwap } from "../src";
-import { Token, TOKEN_PROGRAM_ID, AccountLayout, u64 } from "@solana/spl-token";
-import { getTokenSwapInfo, accountInfoFromSim } from "../src/utils";
+import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram } from "../src";
+import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getTokenSwapInfo } from "../src/utils";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } = web3;
 
 describe('token swap', () => {

@@ -7,7 +7,7 @@ import { initializeLinearPriceCurve, tokenSwapProgram, getMintInfo } from "rly-j
 import { Wallet } from '@metaplex/js';
 import { PublicKey, Keypair } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
-import { Provider, web3 } from '@project-serum/anchor';
+import { Provider } from '@project-serum/anchor';
 import { getAssociatedTokenAddress } from '../utils';
 const InitTbc: FC = () => {
 
@@ -65,45 +65,53 @@ const InitTbc: FC = () => {
         if (!wallet.publicKey) {
             console.log("wallet not active")
         } else {
-            const {
-                slopeNumerator,
-                slopeDenominator,
-                initialTokenAPriceNumerator,
-                initialTokenAPriceDenominator,
-                initialTokenBLiquidity,
-                tokenA,
-                tokenB
-            } = formValues;
+
+            try {
+                const {
+                    slopeNumerator,
+                    slopeDenominator,
+                    initialTokenAPriceNumerator,
+                    initialTokenAPriceDenominator,
+                    initialTokenBLiquidity,
+                    tokenA,
+                    tokenB
+                } = formValues;
 
 
-            tokenSwapInfo = Keypair.generate();
-            setFormValues({
-                ...formValues,
-                tokenSwapInfo: tokenSwapInfo.publicKey.toBase58()
-            })
-            const tokenSwap = await tokenSwapProgram(provider);
-            const callerTokenBAccount = await getAssociatedTokenAddress(new PublicKey(tokenB), wallet.publicKey)
-            const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: new PublicKey(tokenB), connection });
+                tokenSwapInfo = Keypair.generate();
+                setFormValues({
+                    ...formValues,
+                    tokenSwapInfo: tokenSwapInfo.publicKey.toBase58()
+                })
+                const tokenSwap = await tokenSwapProgram(provider);
+                const callerTokenBAccount = await getAssociatedTokenAddress(new PublicKey(tokenB), wallet.publicKey)
+                const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: new PublicKey(tokenB), connection });
 
 
-            const result = await initializeLinearPriceCurve({
-                tokenSwap,
-                slopeNumerator: new BN(slopeNumerator),
-                slopeDenominator: new BN(slopeDenominator),
-                initialTokenAPriceNumerator: new BN(initialTokenAPriceNumerator),
-                initialTokenAPriceDenominator: new BN(initialTokenAPriceDenominator),
-                callerTokenBAccount,
-                tokenSwapInfo,
-                tokenA: new PublicKey(tokenA),
-                tokenB: new PublicKey(tokenB),
-                wallet,
-                connection,
-                initialTokenBLiquidity: new BN(initialTokenBLiquidity * (10 ** Number(tokenBDecimals)))
+                const result = await initializeLinearPriceCurve({
+                    tokenSwap,
+                    slopeNumerator: new BN(slopeNumerator),
+                    slopeDenominator: new BN(slopeDenominator),
+                    initialTokenAPriceNumerator: new BN(initialTokenAPriceNumerator),
+                    initialTokenAPriceDenominator: new BN(initialTokenAPriceDenominator),
+                    callerTokenBAccount,
+                    tokenSwapInfo,
+                    tokenA: new PublicKey(tokenA),
+                    tokenB: new PublicKey(tokenB),
+                    wallet,
+                    connection,
+                    initialTokenBLiquidity: new BN(initialTokenBLiquidity * (10 ** Number(tokenBDecimals)))
 
-            })
+                })
 
-            setTbcResponsValues(result);
-            console.log(result)
+                setTbcResponsValues(result);
+
+            } catch (e) {
+
+                console.log(e)
+
+            }
+
 
         }
     };

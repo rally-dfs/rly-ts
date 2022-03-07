@@ -9,5 +9,5 @@ An example app using these repos can be found [here](https://rly-ts-mexux7zlk-rl
 
 | name      | link          | version   |
 | ----------- | ----------- | ---------|
-| rly-js   | [rly-ts](https://www.npmjs.com/package/rly-js)       | [![Crate](https://img.shields.io/npm/v/rly-js)](https://www.npmjs.com/package/rly-ts) |
+| rly-js   | [rly-js](https://www.npmjs.com/package/rly-js)       | [![Crate](https://img.shields.io/npm/v/rly-js)](https://www.npmjs.com/package/rly-ts) |
 | rly-cli  | [rly-cli](https://www.npmjs.com/package/rly-cli)      | [![Crate](https://img.shields.io/npm/v/rly-cli)](https://www.npmjs.com/package/rly-cli) |
