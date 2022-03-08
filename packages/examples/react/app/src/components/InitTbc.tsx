@@ -66,55 +66,48 @@ const InitTbc: FC = () => {
             console.log("wallet not active")
         } else {
 
-            try {
-                const {
-                    slopeNumerator,
-                    slopeDenominator,
-                    initialTokenAPriceNumerator,
-                    initialTokenAPriceDenominator,
-                    initialTokenBLiquidity,
-                    tokenA,
-                    tokenB
-                } = formValues;
+
+            const {
+                slopeNumerator,
+                slopeDenominator,
+                initialTokenAPriceNumerator,
+                initialTokenAPriceDenominator,
+                initialTokenBLiquidity,
+                tokenA,
+                tokenB
+            } = formValues;
 
 
-                tokenSwapInfo = Keypair.generate();
-                setFormValues({
-                    ...formValues,
-                    tokenSwapInfo: tokenSwapInfo.publicKey.toBase58()
-                })
+            tokenSwapInfo = Keypair.generate();
+            setFormValues({
+                ...formValues,
+                tokenSwapInfo: tokenSwapInfo.publicKey.toBase58()
+            })
 
-                const tokenSwap = await tokenSwapProgram(provider);
-                console.log("program", tokenSwap)
-                console.log("tokenswap info", tokenSwapInfo.publicKey)
-                console.log("wallet pub key", wallet.publicKey)
-                const callerTokenBAccount = await getAssociatedTokenAddress(new PublicKey(tokenB), wallet.publicKey)
-                const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: new PublicKey(tokenB), connection });
+            const tokenSwap = await tokenSwapProgram(provider);
+            const callerTokenBAccount = await getAssociatedTokenAddress(new PublicKey(tokenB), wallet.publicKey)
+            const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: new PublicKey(tokenB), connection });
 
 
-                const result = await initializeLinearPriceCurve({
-                    tokenSwap,
-                    slopeNumerator: new BN(slopeNumerator),
-                    slopeDenominator: new BN(slopeDenominator),
-                    initialTokenAPriceNumerator: new BN(initialTokenAPriceNumerator),
-                    initialTokenAPriceDenominator: new BN(initialTokenAPriceDenominator),
-                    callerTokenBAccount,
-                    tokenSwapInfo,
-                    tokenA: new PublicKey(tokenA),
-                    tokenB: new PublicKey(tokenB),
-                    wallet,
-                    connection,
-                    initialTokenBLiquidity: new BN(initialTokenBLiquidity * (10 ** Number(tokenBDecimals)))
+            const result = await initializeLinearPriceCurve({
+                tokenSwap,
+                slopeNumerator: new BN(slopeNumerator),
+                slopeDenominator: new BN(slopeDenominator),
+                initialTokenAPriceNumerator: new BN(initialTokenAPriceNumerator),
+                initialTokenAPriceDenominator: new BN(initialTokenAPriceDenominator),
+                callerTokenBAccount,
+                tokenSwapInfo,
+                tokenA: new PublicKey(tokenA),
+                tokenB: new PublicKey(tokenB),
+                wallet,
+                connection,
+                initialTokenBLiquidity: new BN(initialTokenBLiquidity * (10 ** Number(tokenBDecimals)))
 
-                })
+            })
 
-                setTbcResponsValues(result);
+            setTbcResponsValues(result);
 
-            } catch (e) {
 
-                console.log(e)
-
-            }
 
 
         }
