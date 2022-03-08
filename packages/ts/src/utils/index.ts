@@ -3,7 +3,7 @@ import { web3, BN, Provider, Address } from '@project-serum/anchor';
 import * as BufferLayout from "@solana/buffer-layout";
 import { u64, AccountLayout, TOKEN_PROGRAM_ID, MintLayout, Token } from "@solana/spl-token";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-const { PublicKey, SystemProgram, Keypair } = web3;
+const { PublicKey, SystemProgram, Keypair, Transaction } = web3;
 
 
 const { accountLayout: { SWAP_ACCOUNT_SPACE } } = config;
@@ -257,7 +257,7 @@ export const generateCreateTokenAccountInstructions = async (connection: web3.Co
     }
 }
 
-export const simulateTransaction = async (tx: any, wallet: Wallet, connection: web3.Connection, opts: any, includeAccounts: web3.PublicKey[]) => {
+export const simulateTransaction = async (tx: web3.Transaction, wallet: Wallet, connection: web3.Connection, opts: any, includeAccounts: web3.PublicKey[]) => {
 
 
     tx.feePayer = wallet.publicKey;
