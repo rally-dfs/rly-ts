@@ -1,7 +1,8 @@
 import { config } from "../../config"
-import { web3, BN } from '@project-serum/anchor';
+import { web3, BN, Provider, Address } from '@project-serum/anchor';
 import * as BufferLayout from "@solana/buffer-layout";
 import { u64, AccountLayout, TOKEN_PROGRAM_ID, MintLayout, Token } from "@solana/spl-token";
+import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 const { PublicKey, SystemProgram, Keypair } = web3;
 
 
@@ -10,7 +11,7 @@ const { accountLayout: { SWAP_ACCOUNT_SPACE } } = config;
 export const sRLY_PUBKEY = new PublicKey('RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq');
 
 
-export const getOrCreateAssociatedAccount = async (token, pubKey) => {
+export const getOrCreateAssociatedAccount = async (token: Token, pubKey: web3.PublicKey) => {
 
     const accountInfo = await token.getOrCreateAssociatedAccountInfo(pubKey);
     return accountInfo.address;
@@ -18,7 +19,7 @@ export const getOrCreateAssociatedAccount = async (token, pubKey) => {
 }
 
 
-export const createSwapInfoAccount = async (provider, fromPubkey, programId) => {
+export const createSwapInfoAccount = async (provider: Provider, fromPubkey: web3.PublicKey, programId: web3.PublicKey) => {
     // Generate new keypair
 
     const newAccount = web3.Keypair.generate();
@@ -49,7 +50,7 @@ const uint64Layout = (property: string = 'uint64'): any => {
     return BufferLayout.blob(8, property);
 };
 
-const loadAccount = async (connection, address, programId) => {
+const loadAccount = async (connection: web3.Connection, address: web3.PublicKey, programId: web3.PublicKey) => {
     const accountInfo = await connection.getAccountInfo(address);
     if (accountInfo === null) {
         throw new Error('Failed to find account');
@@ -109,7 +110,7 @@ class Numberu64 extends BN {
     }
 }
 
-export const accountInfoFromSim = async (account) => {
+export const accountInfoFromSim = async (account: any) => {
 
     let data = account.data;
     data = Buffer.from(data[0], data[1]);
@@ -121,9 +122,9 @@ export const accountInfoFromSim = async (account) => {
 
 }
 
-export const getTokenAccountInfo = async (connection, address) => {
+export const getTokenAccountInfo = async (connection: web3.Connection, address: web3.PublicKey) => {
 
-    const { data } = await connection.getAccountInfo(address);
+    const data = await connection.getAccountInfo(address);
     const accountInfo = AccountLayout.decode(data);
     accountInfo.mint = new PublicKey(accountInfo.mint);
     accountInfo.owner = new PublicKey(accountInfo.owner);
@@ -132,7 +133,7 @@ export const getTokenAccountInfo = async (connection, address) => {
 
 }
 
-export const getTokenSwapInfo = async (provider, swapInfoPubKey, programId) => {
+export const getTokenSwapInfo = async (provider: Provider, swapInfoPubKey: web3.PublicKey, programId: web3.PublicKey) => {
 
     const data = await loadAccount(provider.connection, swapInfoPubKey, programId);
     const tokenSwapData = TokenSwapLayout.decode(data);
@@ -205,7 +206,7 @@ export const getTokenSwapInfo = async (provider, swapInfoPubKey, programId) => {
     }
 }
 
-export const generateTokenMintInstructions = async (connection, wallet, authority, freezeAuthority, decimals) => {
+export const generateTokenMintInstructions = async (connection: web3.Connection, wallet: Wallet, authority: web3.PublicKey, freezeAuthority: web3.PublicKey | null, decimals: number) => {
 
     const tokenMint = Keypair.generate();
     const balanceNeeded = await Token.getMinBalanceRentForExemptMint(connection);
@@ -231,7 +232,7 @@ export const generateTokenMintInstructions = async (connection, wallet, authorit
     }
 }
 
-export const generateCreateTokenAccountInstructions = async (connection, wallet, mint, owner) => {
+export const generateCreateTokenAccountInstructions = async (connection: web3.Connection, wallet: Wallet, mint: web3.PublicKey, owner: web3.PublicKey) => {
 
     const tokenAccount = Keypair.generate();
     const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(connection);
@@ -256,7 +257,7 @@ export const generateCreateTokenAccountInstructions = async (connection, wallet,
     }
 }
 
-export const simulateTransaction = async (tx, wallet, connection, opts, includeAccounts) => {
+export const simulateTransaction = async (tx: any, wallet: Wallet, connection: web3.Connection, opts: any, includeAccounts: web3.PublicKey[]) => {
 
 
     tx.feePayer = wallet.publicKey;
@@ -283,12 +284,12 @@ export const simulateTransaction = async (tx, wallet, connection, opts, includeA
     const encodedTransaction = wireTransaction.toString("base64");
     const config: any = { encoding: "base64", commitment };
 
-
     if (includeAccounts) {
         const addresses = (
             Array.isArray(includeAccounts)
                 ? includeAccounts
                 : message.nonProgramIds()
+            // @ts-ignore
         ).map(key => key.toBase58());
 
         config['accounts'] = {

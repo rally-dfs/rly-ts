@@ -1,8 +1,8 @@
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Program, web3, BN, Provider } from '@project-serum/anchor';
-import { config } from "../../../config";
+import { config } from "./config";
 import { Wallet } from '@metaplex/js';
-import { generateTokenMintInstructions, generateCreateTokenAccountInstructions } from '../../utils';
+import { generateTokenMintInstructions, generateCreateTokenAccountInstructions } from 'rly-js';
 
 const { accountLayout: { SWAP_ACCOUNT_SPACE } } = config;
 
@@ -79,6 +79,8 @@ export const initializeLinearPriceCurve = async ({
         programId: tokenSwap.programId
     })
 
+    console.log("issue happening here")
+
     const initCurveIx = tokenSwap.instruction.initializeLinearPrice(
         slopeNumerator,
         slopeDenominator,
@@ -98,6 +100,8 @@ export const initializeLinearPriceCurve = async ({
         }
     );
 
+    console.log("we don't get here")
+
     setupTransaction.add(
         ...tokenIx,
         ...createTokenATokenAccountIx,
@@ -116,5 +120,4 @@ export const initializeLinearPriceCurve = async ({
     await connection.confirmTransaction(setupTx)
     const tx = await provider.send(initTbcTransaction, [tokenSwapInfo, feeAccount, destinationAccount])
     return { tx, setupTx, destinationAccount }
-
 }

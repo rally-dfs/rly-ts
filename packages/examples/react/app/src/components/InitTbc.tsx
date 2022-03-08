@@ -3,7 +3,9 @@ import { FC, useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Button, Grid, TextField, Typography, Box, Stack, Link } from '@mui/material';
 import BN from 'bn.js';
-import { initializeLinearPriceCurve, tokenSwapProgram, getMintInfo } from "rly-js"
+import { /*initializeLinearPriceCurve/*, tokenSwapProgram,,*/ getMintInfo } from "rly-js"
+import { tokenSwapProgram } from '../utils/tokenSwapProgram';
+import { initializeLinearPriceCurve } from '../utils/initializeLinearPriceCurve';
 import { Wallet } from '@metaplex/js';
 import { PublicKey, Keypair } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
@@ -83,7 +85,11 @@ const InitTbc: FC = () => {
                     ...formValues,
                     tokenSwapInfo: tokenSwapInfo.publicKey.toBase58()
                 })
+
                 const tokenSwap = await tokenSwapProgram(provider);
+                console.log("program", tokenSwap)
+                console.log("tokenswap info", tokenSwapInfo.publicKey)
+                console.log("wallet pub key", wallet.publicKey)
                 const callerTokenBAccount = await getAssociatedTokenAddress(new PublicKey(tokenB), wallet.publicKey)
                 const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: new PublicKey(tokenB), connection });
 

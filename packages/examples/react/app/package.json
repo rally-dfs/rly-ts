@@ -2,6 +2,7 @@
   "name": "rly-test-app",
   "private": true,
   "scripts": {
+    "clean": "rm -rf .next",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -10,19 +11,20 @@
   "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
+    "@metaplex/js": "^4.12.0",
     "@mui/material": "^5.4.3",
     "@project-serum/anchor": "^0.22.1",
-    "rly-js": "^0.0.1",
     "@solana/spl-token": "^0.1.0",
     "@solana/wallet-adapter-base": "^0.9.3",
     "@solana/wallet-adapter-react": "^0.15.3",
     "@solana/wallet-adapter-react-ui": "^0.9.5",
     "@solana/wallet-adapter-wallets": "^0.15.4",
-    "@solana/web3.js": "^1.35.1",
+    "@solana/web3.js": "^1.32.0",
     "bn.js": "^5.2.0",
     "next": "12.0.10",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "rly-js": "^0.0.2"
   },
   "devDependencies": {
     "@types/node": "17.0.17",

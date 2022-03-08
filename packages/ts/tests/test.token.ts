@@ -44,26 +44,6 @@ describe('spl token', () => {
 
     })
 
-    it('should transfer spl token second account', async () => {
-
-        const fromTokenAcct = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, tokenMint.publicKey, wallet.publicKey)
-        const associatedAcctIx = await Token.createAssociatedTokenAccountInstruction(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, tokenMint.publicKey, tokenAccount, wallet.publicKey, wallet.publicKey)
-
-
-
-
-        const tx = await transferToken({
-            from: wallet.publicKey,
-            to: receiver
-        })
-
-        await connection.confirmTransaction(tx)
-        const data = await getMetadata({ tokenMint, connection })
-        assert.strictEqual(data.name, name);
-        assert.strictEqual(data.symbol, symbol);
-
-    })
-
     it('should add metadata to an existing fungible token mint', async () => {
 
         const { payer } = wallet;

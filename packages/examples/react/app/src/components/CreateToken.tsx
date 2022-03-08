@@ -4,7 +4,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Button, Grid, TextField, Typography, Box, Stack, Link } from '@mui/material';
 import BN from 'bn.js';
 import { createToken } from "rly-js"
-import { Wallet } from '@metaplex/js';
+import { Wallet } from "@metaplex/js"
 import { PublicKey } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
 
@@ -57,6 +57,8 @@ const CreateToken: FC = () => {
             console.log("wallet not active")
         } else {
             const { tokenName, tokenSymbol, tokenDecimals, initialSupply } = formValues;
+
+            console.log(wallet.publicKey)
 
             //convert init supply to decimal units
 

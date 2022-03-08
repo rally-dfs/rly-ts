@@ -7,7 +7,7 @@ import { config } from "../../../config";
 const { canonicalSwap } = config.programs;
 
 
-export const canonicalSwapProgram = async (provider) => {
+export const canonicalSwapProgram = async (provider: anchor.Provider) => {
 
     // configure anchor client
     anchor.setProvider(provider);
