@@ -152,6 +152,13 @@ This command allows you to set up a token bonding curve
 
 `rly-cli init-tbc`
 
+Sample values
+
+slope_numerator = 16506  
+slope_denominator = 10_000_000_000  
+initial_token_a_price_numerator = 1  
+initial_token_a_price_denominator = 100  
+
 ```
 Usage: rly-cli tbc-init [options] <token_a> <token_b> <token_b_liquidit>
 
