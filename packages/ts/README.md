@@ -1,4 +1,4 @@
-# DFS JS 
+# RLY JS 
 
 ## Install
 
@@ -14,7 +14,7 @@ with yarn
 yarn add i rly-js
 ```
 
-## Usage
+## Node Usage
 
 ### Token
 
@@ -23,7 +23,7 @@ yarn add i rly-js
 // token
 
 import { Keypair, Connection, clusterApiUrl } from 'solana/web3js`;
-import { createToken, getMetadata } from 'dfs-js';
+import { createToken, getMetadata } from 'rly-js';
 
 const initialSupply = new BN(1_000_000);
 const name = "TestToken";
@@ -52,11 +52,11 @@ const metadata await getMetadata({ tokenMint: tokenMint.publicKey, connection })
 
 ```
 
-// token bonding curve swap
+// token bonding curve
 
 import { Provider } from "@project-serum/anchor"
 import { Keypair, Connection, clusterApiUrl } from 'solana/web3js`;
-import { tokenSwapProgram } from 'dfs-js';
+import { tokenSwapProgram } from 'rly-js';
 
 const walletKeyPair = Keypair.generate();
 const provider = new Provider(new Connection(clusterApiUrl("devnet")), new NodeWallet(walletKeyPair), {});
@@ -75,7 +75,7 @@ const tokenSwap = await tokenSwapProgram(provider);
 
 import { Provider } from "@project-serum/anchor"
 import { Keypair, Connection, clusterApiUrl } from 'solana/web3js`;
-import { canonicalSwapProgram } from 'dfs-js';
+import { canonicalSwapProgram } from 'rly-js';
 
 const walletKeyPair = Keypair.generate();
 const provider = new Provider(new Connection(clusterApiUrl("devnet")), new NodeWallet(walletKeyPair), {});
@@ -85,3 +85,8 @@ const tokenSwap = await canonicalSwapProgram(provider);
 // view examples https://github.com/rally-dfs/dfs-ts/tree/main/ts/tests
 
 ```
+
+## React Usage
+
+The `rly-ts` library can be used to call the rly network on-chain programs directly from client applications. Examples of doing this with react can be found [here](https://github.com/rally-dfs/rly-ts/tree/main/packages/examples/react/app)
+
