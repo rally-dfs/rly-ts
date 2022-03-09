@@ -1,5 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
-import BN from 'bn.js';
+import { BN } from "@project-serum/anchor";
+
+const ten = new BN(10);
+
 export const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 /** Address of the SPL Associated Token Account program */
 export const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
@@ -18,11 +21,11 @@ export const getAssociatedTokenAddress = async (
     return address;
 }
 
-export const baseToDec = (price: number, dec: number) => {
-    return new BN(price * 10 ** dec)
+export const baseToDec = (price: BN, dec: BN) => {
+    return new BN(price.toNumber() * Math.pow(10, dec.toNumber()))
 }
 
-export const decToBase = (decVal: number, dec: number) => {
-    return new BN(decVal / 10 ** dec)
+export const decToBase = (decVal: BN, dec: BN) => {
+    return decVal.toNumber() / Math.pow(10, dec.toNumber())
 }
 

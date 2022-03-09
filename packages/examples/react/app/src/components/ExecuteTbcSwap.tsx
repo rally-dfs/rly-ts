@@ -7,6 +7,7 @@ import { Wallet } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
 import { Provider } from '@project-serum/anchor';
+import BN from 'bn.js';
 import { getAssociatedTokenAddress, baseToDec, decToBase } from '../utils';
 
 const ExecuteTbcSwap: FC = () => {
@@ -51,8 +52,6 @@ const ExecuteTbcSwap: FC = () => {
             amountOut,
         } = formValues;
 
-
-        console.log(tokenSwapInfo)
         const tokenSwapInfoPubKey = new PublicKey(tokenSwapInfo);
         const tokenAPubKey = new PublicKey(tokenA);
         const tokenBPubKey = new PublicKey(tokenB);
@@ -62,8 +61,8 @@ const ExecuteTbcSwap: FC = () => {
         const { decimals: tokenADecimals } = await getMintInfo({ tokenMint: tokenAPubKey, connection });
         const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: tokenBPubKey, connection });
 
-        const amountInBN = baseToDec(amountIn, tokenADecimals);
-        const amountOutBN = baseToDec(amountOut, tokenBDecimals);
+        const amountInBN = baseToDec(new BN(amountIn), new BN(tokenADecimals));
+        const amountOutBN = baseToDec(new BN(amountOut), new BN(tokenBDecimals));
 
         const tokenSwap = await tokenSwapProgram(provider);
         const { feeAccount, tokenAccountA, tokenAccountB, poolToken } = await getTokenSwapInfo(provider, tokenSwapInfoPubKey, tokenSwap.programId);
@@ -124,9 +123,14 @@ const ExecuteTbcSwap: FC = () => {
                 connection
             })
 
+            console.log(tokenBAccountInfo.amount.toString())
+
+            //console.log(amountTokenAPostSwap.toString())
+            console.log(amountTokenBPostSwap.toString())
+
             return {
-                amountA: decToBase(tokenAAccountInfo.amount.toNumber() - amountTokenAPostSwap.toNumber(), tokenADecimals),
-                amountB: decToBase(amountTokenBPostSwap.toNumber() - tokenBAccountInfo.amount.toNumber(), tokenBDecimals),
+                amountA: decToBase((new BN(tokenAAccountInfo.amount)).sub(new BN(amountTokenAPostSwap)), new BN(tokenADecimals)),
+                amountB: decToBase((new BN(amountTokenBPostSwap)).sub(new BN(tokenBAccountInfo.amount)), new BN(tokenBDecimals))
             }
 
 
@@ -134,8 +138,8 @@ const ExecuteTbcSwap: FC = () => {
             console.log(error)
             console.log("invalid amounts")
             return {
-                amountA: decToBase(amountInBN.toNumber(), tokenADecimals),
-                amountB: decToBase(amountOutBN.toNumber(), tokenBDecimals),
+                amountA: decToBase(amountInBN, new BN(tokenADecimals)),
+                amountB: decToBase(amountOutBN, new BN(tokenBDecimals)),
 
             }
         }
@@ -143,10 +147,10 @@ const ExecuteTbcSwap: FC = () => {
     }
 
     useEffect(() => {
-        console.log('amountIn', formValues.amountIn);
         const estimate = async () => {
             const { amountB } = await estimateSwapValues()
-            setEstimateOut(amountB.toNumber())
+            console.log(amountB)
+            setEstimateOut(Number(amountB))
         }
         if (wallet.publicKey && formValues.amountIn > 0) {
             estimate()
@@ -155,7 +159,6 @@ const ExecuteTbcSwap: FC = () => {
 
     const handleInputChange = async (e: any) => {
         const { name, value } = e.target;
-        console.log("getting called")
         setFormValues({
             ...formValues,
             [name]: value,
@@ -166,7 +169,6 @@ const ExecuteTbcSwap: FC = () => {
     const handleSubmit = async (e: any) => {
         e.preventDefault();
 
-        console.log("submit")
 
         if (!wallet.publicKey) {
             console.log("wallet not active")
@@ -203,7 +205,6 @@ const ExecuteTbcSwap: FC = () => {
             })
 
             setSwapResponseValues({ tx: result });
-            console.log(result)
 
         }
     };
