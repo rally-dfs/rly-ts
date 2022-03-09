@@ -179,6 +179,40 @@ describe('token swap', () => {
         assert.ok(swapTokenBInfo.amount.eq(new BN(16000000000)));
     })
 
+    it('it should swap back on a linear price curve', async () => {
+
+        const tokenSwap = await tokenSwapProgram(provider);
+        const amountOut = new BN(0)
+
+        const tx = await executeSwap({
+            tokenSwap,
+            tokenSwapInfo: tokenSwapInfo.publicKey,
+            amountIn: new BN(20 * 10 ** 8),
+            amountOut,
+            userTransferAuthority: wallet.publicKey,
+            userSourceTokenAccount: callerTokenBAccount,
+            userDestinationTokenAccount: callerTokenAAccount,
+            swapSourceTokenAccount: tokenBTokenAccount,
+            swapDestinationTokenAccount: tokenATokenAccount,
+            poolMintAccount: poolToken.publicKey,
+            poolFeeAccount: feeAccount,
+            wallet,
+            connection
+        })
+
+        await connection.confirmTransaction(tx)
+
+        const usertokenAInfo = await tokenA.getAccountInfo(callerTokenAAccount);
+        const usertokenBInfo = await tokenB.getAccountInfo(callerTokenBAccount);
+        const swapTokenAInfo = await tokenA.getAccountInfo(tokenATokenAccount);
+        const swapTokenBInfo = await tokenB.getAccountInfo(tokenBTokenAccount);
+
+        assert.ok(usertokenAInfo.amount.eq(new BN(890000000000)));
+        assert.ok(swapTokenAInfo.amount.eq(new BN(110000000000)));
+        assert.ok(usertokenBInfo.amount.eq(new BN(2000000000)));
+        assert.ok(swapTokenBInfo.amount.eq(new BN(18000000000)));
+    })
+
 })
 
 
