@@ -18,6 +18,7 @@ interface initializeLinearPriceCurveParams {
     tokenSwapInfo: web3.Keypair;
     tokenA: web3.PublicKey;
     tokenB: web3.PublicKey;
+    poolTokenDecimals: number;
     wallet: Wallet;
     connection: any;
     initialTokenBLiquidity: BN;
@@ -33,6 +34,7 @@ export const initializeLinearPriceCurve = async ({
     tokenSwapInfo,
     tokenA,
     tokenB,
+    poolTokenDecimals,
     wallet,
     connection,
     initialTokenBLiquidity
@@ -53,7 +55,7 @@ export const initializeLinearPriceCurve = async ({
 
     // get create pooltoken mint ix
 
-    const { tokenIx, tokenMint: poolTokenMint } = await generateTokenMintInstructions(connection, wallet, expectedSwapAuthorityPDA, null, 8)
+    const { tokenIx, tokenMint: poolTokenMint } = await generateTokenMintInstructions(connection, wallet, expectedSwapAuthorityPDA, null, poolTokenDecimals)
 
 
     // get token accounts creat instrucstions for swap pda

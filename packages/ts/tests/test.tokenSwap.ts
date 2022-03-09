@@ -84,6 +84,7 @@ describe('token swap', () => {
         initialTokenAPriceDenominator = new BN(3);
 
         const tokenSwap = await tokenSwapProgram(provider);
+        const poolTokenDecimals = 9;
 
         const { tx, destinationAccount } = await initializeLinearPriceCurve({
             tokenSwap,
@@ -95,6 +96,7 @@ describe('token swap', () => {
             tokenSwapInfo,
             tokenA: tokenA.publicKey,
             tokenB: tokenB.publicKey,
+            poolTokenDecimals,
             wallet,
             connection,
             initialTokenBLiquidity
