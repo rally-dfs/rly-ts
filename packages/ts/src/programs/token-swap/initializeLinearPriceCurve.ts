@@ -26,7 +26,7 @@ interface initializeLinearPriceCurveParams {
 
 interface initializeLinearPriceCurveOpts {
     //if the owner of the caller tokenB account is not the caller wallet account include the tokenB owner wallet here
-    //do not use of calling from web
+    //do not use if calling from web
     callerTokenBAccountOwner?: NodeWallet;
     //if the owner of the fee token account and destination token account is not the caller wallet include the admin owner public key here
     adminAccountOwner?: web3.PublicKey;
