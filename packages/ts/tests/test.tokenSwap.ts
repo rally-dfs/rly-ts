@@ -26,6 +26,8 @@ describe('token swap', () => {
     let tokenBTokenAccount;
     let callerTokenAAccount;
     let callerTokenBAccount;
+    let tokenBAdmin;
+    let tokenBAdminTokenAccount;
     const initialTokenBLiquidity = new BN(200 * 10 ** 8);
     const initialTokenALiquidity = new BN(10000 * 10 ** 8);
     const swapInitAmountTokenA = new BN(2400 * 10 ** 8);
@@ -33,6 +35,7 @@ describe('token swap', () => {
 
     before(async () => {
         const walletKeyPair = Keypair.generate();
+        tokenBAdmin = Keypair.generate();
         tokenSwapInfo = Keypair.generate();
         provider = new Provider(new Connection(clusterApiUrl("devnet")), new NodeWallet(walletKeyPair), {});
         ({ connection, wallet } = provider);
@@ -58,9 +61,11 @@ describe('token swap', () => {
             TOKEN_PROGRAM_ID
         );
 
-        callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
         callerTokenAAccount = await tokenA.createAssociatedTokenAccount(payer.publicKey);
+        callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
+        tokenBAdminTokenAccount = await tokenB.createAssociatedTokenAccount(tokenBAdmin.publicKey);
         await tokenB.mintTo(callerTokenBAccount, payer, [], initialTokenBLiquidity.toNumber());
+        await tokenB.mintTo(tokenBAdminTokenAccount, payer, [], initialTokenBLiquidity.toNumber());
         await tokenA.mintTo(callerTokenAAccount, payer, [], initialTokenALiquidity.toNumber());
 
     })
@@ -78,6 +83,8 @@ describe('token swap', () => {
 
         const { payer } = wallet
 
+        const adminOwner = Keypair.generate();
+
         slopeNumerator = new BN(1);
         slopeDenominator = new BN(200000000);
         initialTokenAPriceNumerator = new BN(150);
@@ -86,13 +93,14 @@ describe('token swap', () => {
         const tokenSwap = await tokenSwapProgram(provider);
         const poolTokenDecimals = 9;
 
+
         const { tx, destinationAccount } = await initializeLinearPriceCurve({
             tokenSwap,
             slopeNumerator,
             slopeDenominator,
             initialTokenAPriceNumerator,
             initialTokenAPriceDenominator,
-            callerTokenBAccount,
+            callerTokenBAccount: tokenBAdminTokenAccount,
             tokenSwapInfo,
             tokenA: tokenA.publicKey,
             tokenB: tokenB.publicKey,
@@ -100,7 +108,13 @@ describe('token swap', () => {
             wallet,
             connection,
             initialTokenBLiquidity
-        })
+        },
+
+            {
+                callerTokenBAccountOwner: new NodeWallet(tokenBAdmin),
+                adminAccountOwner: adminOwner.publicKey
+            }
+        )
 
         await connection.confirmTransaction(tx);
 
@@ -141,7 +155,7 @@ describe('token swap', () => {
         })
 
         assert.ok(amountTokenAPostSwap.eq(new BN(760000000000)));
-        assert.ok(amountTokenBPostSwap.eq(new BN(4000000000)));
+        assert.ok(amountTokenBPostSwap.eq(new BN(24000000000)));
 
     })
 
@@ -175,7 +189,7 @@ describe('token swap', () => {
 
         assert.ok(usertokenAInfo.amount.eq(new BN(760000000000)));
         assert.ok(swapTokenAInfo.amount.eq(new BN(240000000000)));
-        assert.ok(usertokenBInfo.amount.eq(new BN(4000000000)));
+        assert.ok(usertokenBInfo.amount.eq(new BN(24000000000)));
         assert.ok(swapTokenBInfo.amount.eq(new BN(16000000000)));
     })
 
@@ -209,7 +223,7 @@ describe('token swap', () => {
 
         assert.ok(usertokenAInfo.amount.eq(new BN(890000000000)));
         assert.ok(swapTokenAInfo.amount.eq(new BN(110000000000)));
-        assert.ok(usertokenBInfo.amount.eq(new BN(2000000000)));
+        assert.ok(usertokenBInfo.amount.eq(new BN(22000000000)));
         assert.ok(swapTokenBInfo.amount.eq(new BN(18000000000)));
     })
 

@@ -1,7 +1,7 @@
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Program, web3, BN, Provider } from '@project-serum/anchor';
 import { config } from "../../../config";
-import { Wallet } from '@metaplex/js';
+import { Wallet, NodeWallet } from '@metaplex/js';
 import { generateTokenMintInstructions, generateCreateTokenAccountInstructions } from '../../utils';
 
 const { accountLayout: { SWAP_ACCOUNT_SPACE } } = config;
@@ -24,6 +24,14 @@ interface initializeLinearPriceCurveParams {
     initialTokenBLiquidity: BN;
 }
 
+interface initializeLinearPriceCurveOpts {
+    //if the owner of the caller tokenB account is not the caller wallet account include the tokenB owner wallet here
+    //do not use of calling from web
+    callerTokenBAccountOwner?: NodeWallet;
+    //if the owner of the fee token account and destination token account is not the caller wallet include the admin owner public key here
+    adminAccountOwner?: web3.PublicKey;
+}
+
 export const initializeLinearPriceCurve = async ({
     tokenSwap,
     slopeNumerator,
@@ -39,7 +47,13 @@ export const initializeLinearPriceCurve = async ({
     connection,
     initialTokenBLiquidity
 
-} = {} as initializeLinearPriceCurveParams) => {
+} = {} as initializeLinearPriceCurveParams,
+    {
+        callerTokenBAccountOwner,
+        adminAccountOwner
+    } = {} as initializeLinearPriceCurveOpts
+
+) => {
 
     const provider = new Provider(connection, wallet, { commitment: "confirmed", preflightCommitment: "processed" });
     const setupTransaction = new Transaction();
@@ -64,12 +78,12 @@ export const initializeLinearPriceCurve = async ({
     const { tokenAccount: tokenBTokenAccount, accountIx: createTokenBTokenAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, tokenB, expectedSwapAuthorityPDA)
 
 
-    const tokenBTransferIx = Token.createTransferInstruction(TOKEN_PROGRAM_ID, callerTokenBAccount, tokenBTokenAccount.publicKey, wallet.publicKey, [], initialTokenBLiquidity.toNumber())
+    const tokenBTransferIx = Token.createTransferInstruction(TOKEN_PROGRAM_ID, callerTokenBAccount, tokenBTokenAccount.publicKey, callerTokenBAccountOwner ? callerTokenBAccountOwner.publicKey : wallet.publicKey, [], initialTokenBLiquidity.toNumber())
 
     // create token accounts for fees and pool tokens owned by calling account (can't use associated token account as two accounts req'd)
 
-    const { tokenAccount: feeAccount, accountIx: createFeeAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, poolTokenMint.publicKey, wallet.publicKey)
-    const { tokenAccount: destinationAccount, accountIx: createDestinationAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, poolTokenMint.publicKey, wallet.publicKey)
+    const { tokenAccount: feeAccount, accountIx: createFeeAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, poolTokenMint.publicKey, adminAccountOwner ? adminAccountOwner : wallet.publicKey)
+    const { tokenAccount: destinationAccount, accountIx: createDestinationAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, poolTokenMint.publicKey, adminAccountOwner ? adminAccountOwner : wallet.publicKey)
 
     const tokenSwapInfoIx = web3.SystemProgram.createAccount({
         fromPubkey: wallet.publicKey,
@@ -114,7 +128,7 @@ export const initializeLinearPriceCurve = async ({
         initCurveIx
     )
 
-    const setupTx = await provider.send(setupTransaction, [poolTokenMint, tokenATokenAccount, tokenBTokenAccount])
+    const setupTx = await provider.send(setupTransaction, [poolTokenMint, tokenATokenAccount, tokenBTokenAccount, callerTokenBAccountOwner && callerTokenBAccountOwner.payer])
     await connection.confirmTransaction(setupTx)
     const tx = await provider.send(initTbcTransaction, [tokenSwapInfo, feeAccount, destinationAccount])
     return { tx, setupTx, destinationAccount }
