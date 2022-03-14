@@ -1,6 +1,6 @@
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Program, web3, BN, Provider } from '@project-serum/anchor';
-import { Wallet } from '@metaplex/js';
+import { Wallet, NodeWallet } from '@metaplex/js';
 
 const { PublicKey, SystemProgram: { programId }, Transaction } = web3;
 
@@ -20,6 +20,10 @@ interface executeSwapParams {
     connection: web3.Connection
 }
 
+interface executeSwapOpts {
+    userTransferAuthorityOwner?: NodeWallet;
+}
+
 export const executeSwap = async ({
     tokenSwap,
     tokenSwapInfo,
@@ -35,7 +39,9 @@ export const executeSwap = async ({
     wallet,
     connection
 
-} = {} as executeSwapParams) => {
+} = {} as executeSwapParams,
+    { userTransferAuthorityOwner } = {} as executeSwapOpts
+) => {
 
     const provider = new Provider(connection, wallet, { commitment: "confirmed", preflightCommitment: "processed" });
     const transaction = new Transaction();
@@ -69,6 +75,6 @@ export const executeSwap = async ({
     )
 
     transaction.add(ix);
-    return provider.send(transaction, [])
+    return provider.send(transaction, [userTransferAuthorityOwner && userTransferAuthorityOwner.payer])
 
 }
