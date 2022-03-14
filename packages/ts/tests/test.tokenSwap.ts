@@ -221,8 +221,6 @@ describe('token swap', () => {
             { userTransferAuthorityOwner: new NodeWallet(tokenBAdmin) }
         )
 
-        console.log(tx)
-
         await connection.confirmTransaction(tx)
 
         const usertokenAInfo = await tokenA.getAccountInfo(tokenAAdminTokenAccount);
