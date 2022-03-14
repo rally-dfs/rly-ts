@@ -21,6 +21,8 @@ interface executeSwapParams {
 }
 
 interface executeSwapOpts {
+    // if the authority over the userSourceTokenAccount and userDestinationAccount is not the caller wallet use this options
+    // do not use if calling from web
     userTransferAuthorityOwner?: NodeWallet;
 }
 
