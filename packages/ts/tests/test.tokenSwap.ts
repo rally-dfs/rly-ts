@@ -3,9 +3,9 @@ import assert from 'assert';
 
 import { web3, Provider, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
-import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram } from "../src";
+import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram } from "rly-js";
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { getTokenSwapInfo } from "../src/utils";
+import { getTokenSwapInfo } from "rly-js";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } = web3;
 
 describe('token swap', () => {
@@ -196,6 +196,33 @@ describe('token swap', () => {
         assert.ok(usertokenBInfo.amount.eq(new BN(4000000000)));
         assert.ok(swapTokenAInfo.amount.eq(new BN(240000000000)));
         assert.ok(swapTokenBInfo.amount.eq(new BN(16000000000)));
+    })
+
+
+    it('it should estimate the reverse of a token swap', async () => {
+
+        const tokenSwap = await tokenSwapProgram(provider);
+        const amountOut = new BN(0)
+
+        const { amountTokenAPostSwap: userSourceTokenAmount, amountTokenBPostSwap: userDestinationTokenAmount } = await estimateSwap({
+            tokenSwap,
+            tokenSwapInfo: tokenSwapInfo.publicKey,
+            amountIn: new BN(20 * 10 ** 8),
+            amountOut,
+            userTransferAuthority: tokenBAdmin.publicKey,
+            userSourceTokenAccount: tokenBAdminTokenAccount,
+            userDestinationTokenAccount: tokenAAdminTokenAccount,
+            swapSourceTokenAccount: tokenBTokenAccount,
+            swapDestinationTokenAccount: tokenATokenAccount,
+            poolMintAccount: poolToken.publicKey,
+            poolFeeAccount: feeAccount,
+            wallet,
+            connection
+        })
+
+        assert.ok(userDestinationTokenAmount.eq(new BN(890000000000)));
+        assert.ok(userSourceTokenAmount.eq(new BN(2000000000)));
+
     })
 
     it('it should swap back on a linear price curve', async () => {
