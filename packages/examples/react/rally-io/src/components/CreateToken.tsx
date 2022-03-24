@@ -8,7 +8,12 @@ import { Wallet } from "@metaplex/js"
 import { PublicKey } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
 
-const CreateToken: FC = () => {
+
+interface createTokenProps {
+    updateTokenB: any
+}
+
+const CreateToken: FC<createTokenProps> = ({ updateTokenB }) => {
 
     const { connection } = useConnection();
     const wallet = useWallet() as Wallet;
@@ -30,8 +35,8 @@ const CreateToken: FC = () => {
     const defaultTokenValues = {
         tokenName: "",
         tokenSymbol: "",
-        tokenDecimals: 0,
-        initialSupply: 0
+        tokenDecimals: 9,
+        initialSupply: 1000000
     } as createTokenValues;
 
 
@@ -79,6 +84,7 @@ const CreateToken: FC = () => {
                 wallet
             })
 
+            updateTokenB({ pubKey: result.tokenMint, tokenBName: tokenName })
             setTokenReturnValues(result);
             console.log(result)
 
@@ -90,9 +96,6 @@ const CreateToken: FC = () => {
 
 
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 6 }}>
-            <Typography variant="h6" gutterBottom>
-                Create Token
-            </Typography>
             <Grid container spacing={3} maxWidth="sm">
                 <Grid item xs={12} sm={6}>
                     <TextField

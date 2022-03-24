@@ -1,0 +1,30 @@
+{
+    "name": "rally io test app",
+    "logoURI": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq/logo.png",
+    "keywords": [
+        "rally"
+    ],
+    "stablecoin": {
+        "name": "test-token",
+        "description": "test token for rally io test app"
+    },
+    "timestamp": "2022-04-21T00:00:00+00:00",
+    "tokens": [
+        {
+            "chainId": 103,
+            "address": "6Gkq8XBVMepMWwWT9Hp6VFHKVxFxAut7Zmh2MaTsNv2b",
+            "symbol": "DFS",
+            "name": "DFS Coin",
+            "decimals": 9,
+            "swapId": "F6idfEmch36DscmaQz6p73epNrPEAsrNw7iRcBNaX2iv",
+            "tags": [
+                "test-token"
+            ]
+        }
+    ],
+    "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+    }
+}

@@ -1,7 +1,7 @@
 
 import { FC, useState, useEffect } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Button, Grid, TextField, Typography, Box, Stack, Link } from '@mui/material';
+import { Button, Grid, TextField, Typography, Box, Stack, Link, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { executeSwap, estimateSwap, tokenSwapProgram, getTokenSwapInfo, getMintInfo, getTokenAccountInfo } from "rly-js"
 import { Wallet } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
@@ -10,7 +10,21 @@ import { Provider } from '@project-serum/anchor';
 import BN from 'bn.js';
 import { getAssociatedTokenAddress, baseToDec, decToBase } from '../utils';
 
-const ExecuteTbcSwap: FC = () => {
+interface token {
+    chainId: number,
+    address: string,
+    symbol: string,
+    decimals: number,
+    swapId: string,
+    tags: []
+
+}
+
+interface swapProps {
+    tokenList: token[]
+}
+
+const ExecuteTbcSwap: FC<swapProps> = ({ tokenList }) => {
 
     const { connection } = useConnection();
     const wallet = useWallet() as Wallet;
@@ -19,7 +33,7 @@ const ExecuteTbcSwap: FC = () => {
     type defaultSwapValues = {
         tokenSwapInfo: string,
         tokenA: string,
-        tokenB: string,
+        tokenB: token | "",
         amountIn: number,
         amountOut: number
     }
@@ -30,7 +44,7 @@ const ExecuteTbcSwap: FC = () => {
 
     const defaultSwapValues = {
         tokenSwapInfo: "",
-        tokenA: "",
+        tokenA: "RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq",
         tokenB: "",
         amountIn: 0,
         amountOut: 0
@@ -39,6 +53,7 @@ const ExecuteTbcSwap: FC = () => {
 
     const defaultSwapResponse = {} as swapResponse;
 
+    const [tokens] = useState(tokenList)
     const [formValues, setFormValues] = useState(defaultSwapValues)
     const [estimateOut, setEstimateOut] = useState(0);
     const [swapResponseValues, setSwapResponseValues] = useState(defaultSwapResponse)
@@ -52,9 +67,10 @@ const ExecuteTbcSwap: FC = () => {
             amountOut,
         } = formValues;
 
+
         const tokenSwapInfoPubKey = new PublicKey(tokenSwapInfo);
         const tokenAPubKey = new PublicKey(tokenA);
-        const tokenBPubKey = new PublicKey(tokenB);
+        const tokenBPubKey = new PublicKey(tokenB && tokenB.address);
 
         //convert amount to proper units
 
@@ -68,6 +84,7 @@ const ExecuteTbcSwap: FC = () => {
         const { feeAccount, tokenAccountA, tokenAccountB, poolToken } = await getTokenSwapInfo(provider, tokenSwapInfoPubKey, tokenSwap.programId);
         const callerTokenAAccount = await getAssociatedTokenAddress(tokenAPubKey, wallet.publicKey)
         const callerTokenBAccount = await getAssociatedTokenAddress(tokenBPubKey, wallet.publicKey)
+
 
         return {
             tokenSwap,
@@ -103,8 +120,14 @@ const ExecuteTbcSwap: FC = () => {
             tokenBDecimals
         } = await generateSwapValues()
 
+        console.log("caller token a", callerTokenAAccount.toBase58())
+        console.log("caller token b", callerTokenBAccount.toBase58())
+
         const tokenAAccountInfo = await getTokenAccountInfo(connection, callerTokenAAccount);
         const tokenBAccountInfo = await getTokenAccountInfo(connection, callerTokenBAccount);
+
+        console.log("not getting here")
+
         try {
 
             const { amountTokenAPostSwap, amountTokenBPostSwap } = await estimateSwap({
@@ -159,6 +182,14 @@ const ExecuteTbcSwap: FC = () => {
 
     const handleInputChange = async (e: any) => {
         const { name, value } = e.target;
+
+        if (name === "tokenB") {
+            return setFormValues({
+                ...formValues,
+                tokenB: value,
+                tokenSwapInfo: value.swapId
+            })
+        }
         setFormValues({
             ...formValues,
             [name]: value,
@@ -184,8 +215,6 @@ const ExecuteTbcSwap: FC = () => {
                 feeAccount,
                 tokenAccountA,
                 tokenAccountB,
-                tokenADecimals,
-                tokenBDecimals
             } = await generateSwapValues()
 
             const result = await executeSwap({
@@ -209,17 +238,15 @@ const ExecuteTbcSwap: FC = () => {
         }
     };
 
+    console.log(formValues)
+
 
     return (
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 6 }}>
 
-            <Typography variant="h6" gutterBottom>
-                Execute Swap
-            </Typography>
-
             <Grid container spacing={3} maxWidth="sm">
 
-                <Grid item xs={12} sm={12}>
+                {/*<Grid item xs={12} sm={12}>
                     <TextField
                         required
                         id="tokenSwapInfo"
@@ -230,30 +257,41 @@ const ExecuteTbcSwap: FC = () => {
                         fullWidth
                         variant="standard"
                     />
+                 </Grid>*/}
+                <Grid item xs={12} sm={12}>
+                    <FormControl fullWidth>
+                        <InputLabel id="token-a-select-label">Select Token</InputLabel>
+                        <Select
+                            labelId="token-a-select-label"
+                            id="tokenA"
+                            name="tokenA"
+                            value={formValues.tokenA}
+                            label="Token A"
+                            onChange={handleInputChange}
+                        >
+                            <MenuItem value={formValues.tokenA}>sRLY</MenuItem>
+                        </Select>
+                    </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={12}>
-                    <TextField
-                        required
-                        id="tokenA"
-                        name="tokenA"
-                        label="token A"
-                        fullWidth
-                        variant="standard"
-                        value={formValues.tokenA}
-                        onChange={handleInputChange}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={12}>
-                    <TextField
-                        required
-                        id="tokenB"
-                        name="tokenB"
-                        label="Token B"
-                        fullWidth
-                        variant="standard"
-                        value={formValues.tokenB}
-                        onChange={handleInputChange}
-                    />
+                    <FormControl fullWidth>
+                        <InputLabel id="token-b-select-label">Select Token</InputLabel>
+                        <Select
+                            labelId="token-b-select-label"
+                            id="tokenB"
+                            name="tokenB"
+                            value={formValues.tokenB}
+                            label="Token B"
+                            onChange={handleInputChange}
+                        >
+                            {
+                                tokens.map((token: any, i: number) => {
+                                    return <MenuItem key={i} value={token}>{token.name}</MenuItem>
+                                })
+
+                            }
+                        </Select>
+                    </FormControl>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>

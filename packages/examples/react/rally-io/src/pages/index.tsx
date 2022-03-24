@@ -1,18 +1,9 @@
 import * as React from 'react';
 import type { NextPage } from 'next'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { useWallet } from '@solana/wallet-adapter-react';
 import {
-  AppBar,
-  Toolbar,
   Typography,
-  Divider,
-  GlobalStyles,
-  CssBaseline,
   Container,
-  Alert,
   Grid,
-  Link,
   Card,
   CardHeader,
   CardContent,
@@ -20,49 +11,22 @@ import {
   Box,
   Button
 } from '@mui/material';
-import { indexCopy, APP_NAME } from '../config'
-import { Wallet } from '@metaplex/js';
-
-import CreateToken from '../components/CreateToken'
-import InitTbc from '../components/InitTbc';
-import ExecuteTbcSwap from '../components/ExecuteTbcSwap';
-
+import Link from 'next/link';
+import { APP_NAME, copy } from '../config'
+import Layout from "../components/Layout";
 
 const Home: NextPage = () => {
 
-  const wallet = useWallet() as Wallet;
-
   return (
-    <React.Fragment>
-
-      <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
-      <CssBaseline />
-      <AppBar
-        position="static"
-        color="default"
-        elevation={0}
-        sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-      >
-        <Toolbar sx={{ flexWrap: 'wrap' }}>
-          <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            {APP_NAME}
-          </Typography>
-          <WalletMultiButton />
-        </Toolbar>
-      </AppBar>
+    <Layout title={`Home | ${APP_NAME}`}>
       <Container disableGutters maxWidth="md" component="main" sx={{ pt: 8, pb: 6 }}>
         <Typography variant="h5" align="center" color="text.secondary" component="h1" sx={{ pt: 2, pb: 2 }}>
-          {indexCopy.title}
+          {copy.indexCopy.title}
         </Typography>
         <Typography variant="body1" align="left" color="text.secondary" component="p">
-          {indexCopy.headline}
+          {copy.indexCopy.headline}
         </Typography>
       </Container>
-      {/*!wallet.publicKey &&
-        <Alert severity="error" style={{ justifyContent: "center" }}>
-          please connect wallet
-        </Alert>
-      */}
       <Container maxWidth="md" component="main">
         <Grid container spacing={5} alignItems="flex-end">
           <Grid
@@ -96,12 +60,14 @@ const Home: NextPage = () => {
                 </Box>
               </CardContent>
               <CardActions>
-                <Button
-                  fullWidth
-                  variant='outlined'
-                >
-                  Go
-                </Button>
+                <Link href="/creator">
+                  <Button
+                    fullWidth
+                    variant='outlined'
+                  >
+                    Go
+                  </Button>
+                </Link>
               </CardActions>
             </Card>
           </Grid>
@@ -136,19 +102,21 @@ const Home: NextPage = () => {
                 </Box>
               </CardContent>
               <CardActions>
-                <Button
-                  fullWidth
-                  variant='outlined'
-                >
-                  Go
-                </Button>
+                <Link href="/fan">
+                  <Button
+                    fullWidth
+                    variant='outlined'
+                  >
+                    Go
+                  </Button>
+                </Link>
               </CardActions>
             </Card>
           </Grid>
         </Grid>
       </Container>
 
-    </React.Fragment>
+    </Layout>
   )
 }
 

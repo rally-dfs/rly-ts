@@ -123,7 +123,6 @@ export const accountInfoFromSim = async (account: any) => {
 }
 
 export const getTokenAccountInfo = async (connection: web3.Connection, address: web3.PublicKey) => {
-
     const data = await connection.getAccountInfo(address);
     const accountInfo = AccountLayout.decode(data);
     accountInfo.mint = new PublicKey(accountInfo.mint);

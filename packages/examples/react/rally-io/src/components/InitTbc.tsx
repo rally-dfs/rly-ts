@@ -9,7 +9,14 @@ import { PublicKey, Keypair } from '@solana/web3.js';
 import { EXPLORER_ROOT, NETWORK } from "../config";
 import { Provider } from '@project-serum/anchor';
 import { getAssociatedTokenAddress } from '../utils';
-const InitTbc: FC = () => {
+
+interface initTbcProps {
+    tokenB: string,
+    tokenBName: string
+}
+
+
+const InitTbc: FC<initTbcProps> = ({ tokenB, tokenBName }) => {
 
     const { connection } = useConnection();
     const wallet = useWallet() as Wallet;
@@ -23,7 +30,9 @@ const InitTbc: FC = () => {
         initialTokenAPriceDenominator: number,
         initialTokenBLiquidity: number,
         tokenA: string,
+        tokenAName: string,
         tokenB: string,
+        tokenBName: string,
         tokenSwapInfo: string,
     }
 
@@ -34,8 +43,10 @@ const InitTbc: FC = () => {
         initialTokenAPriceNumerator: 0,
         initialTokenAPriceDenominator: 0,
         initialTokenBLiquidity: 0,
-        tokenA: "",
-        tokenB: "",
+        tokenA: "RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq",
+        tokenAName: "sRLY",
+        tokenB,
+        tokenBName
     } as defaultTbcValues;
 
     type initTbcResponse = {
@@ -49,6 +60,8 @@ const InitTbc: FC = () => {
 
     const [formValues, setFormValues] = useState(defaultTbcValues)
     const [tbcResponseValues, setTbcResponsValues] = useState(defaultInitTbcRespondValues)
+
+    console.log(formValues)
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
@@ -99,16 +112,13 @@ const InitTbc: FC = () => {
                 tokenSwapInfo,
                 tokenA: new PublicKey(tokenA),
                 tokenB: new PublicKey(tokenB),
+                poolTokenDecimals: 9,
                 wallet,
                 connection,
                 initialTokenBLiquidity: new BN(initialTokenBLiquidity * (10 ** Number(tokenBDecimals)))
-
             })
 
             setTbcResponsValues(result);
-
-
-
 
         }
     };
@@ -117,39 +127,12 @@ const InitTbc: FC = () => {
     return (
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 4 }}>
 
-            <Typography variant="h6">
-                Initialize Token Bonding Curve
-            </Typography>
+
             <Typography variant="subtitle1" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
-                *Requires two tokens, make sure that you created two tokens above
+                {`create bonding curve between ${formValues.tokenAName} and ${formValues.tokenBName}`}
             </Typography>
 
             <Grid container spacing={3} maxWidth="sm">
-
-                <Grid item xs={12} sm={12}>
-                    <TextField
-                        required
-                        id="tokenA"
-                        name="tokenA"
-                        label="Token A Mint"
-                        value={formValues.tokenA}
-                        onChange={handleInputChange}
-                        fullWidth
-                        variant="standard"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={12}>
-                    <TextField
-                        required
-                        id="tokenB"
-                        name="tokenB"
-                        label="Token B Mint"
-                        fullWidth
-                        variant="standard"
-                        value={formValues.tokenB}
-                        onChange={handleInputChange}
-                    />
-                </Grid>
                 <Grid item xs={12} sm={6}>
                     <TextField
                         required
@@ -179,7 +162,7 @@ const InitTbc: FC = () => {
                         required
                         id="initialTokenAPriceNumerator"
                         name="initialTokenAPriceNumerator"
-                        label="Initial Token A Price Numerator"
+                        label={`Initial ${formValues.tokenAName} Numerator`}
                         fullWidth
                         variant="standard"
                         value={formValues.initialTokenAPriceNumerator}
@@ -191,7 +174,7 @@ const InitTbc: FC = () => {
                         required
                         id="initialTokenAPriceDenominator"
                         name="initialTokenAPriceDenominator"
-                        label="Initial Token A Price Denominator"
+                        label={`Initial ${formValues.tokenAName} Price Denominator`}
                         fullWidth
                         variant="standard"
                         value={formValues.initialTokenAPriceDenominator}
@@ -203,7 +186,7 @@ const InitTbc: FC = () => {
                         required
                         id="initialTokenBLiquidity"
                         name="initialTokenBLiquidity"
-                        label="Initial Token B Liquidity"
+                        label={`Initial ${formValues.tokenBName} Liquidity`}
                         fullWidth
                         variant="standard"
                         value={formValues.initialTokenBLiquidity}
