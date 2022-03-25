@@ -198,6 +198,34 @@ describe('token swap', () => {
         assert.ok(swapTokenBInfo.amount.eq(new BN(16000000000)));
     })
 
+    it('it should estimate the reverse of a token swap', async () => {
+
+        const tokenSwap = await tokenSwapProgram(provider);
+        const amountOut = new BN(0)
+
+        const { amountTokenAPostSwap: userSourceTokenAmount, amountTokenBPostSwap: userDestinationTokenAmount } = await estimateSwap({
+            tokenSwap,
+            tokenSwapInfo: tokenSwapInfo.publicKey,
+            amountIn: new BN(20 * 10 ** 8),
+            amountOut,
+            userTransferAuthority: tokenBAdmin.publicKey,
+            userSourceTokenAccount: tokenBAdminTokenAccount,
+            userDestinationTokenAccount: tokenAAdminTokenAccount,
+            swapSourceTokenAccount: tokenBTokenAccount,
+            swapDestinationTokenAccount: tokenATokenAccount,
+            poolMintAccount: poolToken.publicKey,
+            poolFeeAccount: feeAccount,
+            wallet,
+            connection
+        })
+
+        assert.ok(userDestinationTokenAmount.eq(new BN(890000000000)));
+        assert.ok(userSourceTokenAmount.eq(new BN(2000000000)));
+
+    })
+
+
+
     it('it should swap back on a linear price curve', async () => {
 
         const tokenSwap = await tokenSwapProgram(provider);
