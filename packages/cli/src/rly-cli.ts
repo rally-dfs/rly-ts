@@ -18,6 +18,7 @@ import {
     executeSwap,
     tokenSwapProgram,
     getTokenSwapInfo,
+    getTokenAccountInfo
 } from 'rly-js';
 
 
@@ -573,8 +574,16 @@ program
 
         const swapData = await getTokenSwapInfo(provider, tokenSwapInfo, tokenSwap.programId);
 
+        const swapSourceInfo = await getTokenAccountInfo(connection, swapData.tokenAccountA);
+        const swapDestInfo = await getTokenAccountInfo(connection, swapData.tokenAccountB);
+
+
+        const swapSourceTokenAccount = swapSourceInfo.mint.toBase58() === tokenA.publicKey.toBase58() ? swapData.tokenAccountA : swapData.tokenAccountB;
+        const swapDestinationTokenAccount = swapDestInfo.mint.toBase58() === tokenB.publicKey.toBase58() ? swapData.tokenAccountB : swapData.tokenAccountA;
+
         const callerTokenAAccount = await getOrCreateAssociatedAccount(tokenA, payer.publicKey);
         const callerTokenBAccount = await getOrCreateAssociatedAccount(tokenB, payer.publicKey);
+
 
         const tx = await executeSwap({
             tokenSwap,
@@ -584,8 +593,8 @@ program
             userTransferAuthority: payer.publicKey,
             userSourceTokenAccount: callerTokenAAccount,
             userDestinationTokenAccount: callerTokenBAccount,
-            swapSourceTokenAccount: swapData.tokenAccountA,
-            swapDestinationTokenAccount: swapData.tokenAccountB,
+            swapSourceTokenAccount,
+            swapDestinationTokenAccount,
             poolMintAccount: swapData.poolToken,
             poolFeeAccount: swapData.feeAccount,
             wallet,
