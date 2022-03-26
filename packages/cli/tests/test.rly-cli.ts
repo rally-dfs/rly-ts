@@ -109,5 +109,9 @@ describe("rly-cli", () => {
         const { payer } = wallet;
         const result = test("tbc-swap", `${tbcPubKey} ${tokenA.publicKey.toBase58()} ${tokenB.publicKey.toBase58()} ${swapInitAmountTokenA.toNumber()} -k ${process.env.KEYPAIR_DEVNET}`)
     });
+    it("it should execute reverse swap on tbc", async () => {
+        const { payer } = wallet;
+        const result = test("tbc-swap", `${tbcPubKey} ${tokenB.publicKey.toBase58()} ${tokenA.publicKey.toBase58()} ${swapInitAmountTokenA.toNumber()} -k ${process.env.KEYPAIR_DEVNET}`)
+    });
 
 });
