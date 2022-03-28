@@ -165,7 +165,7 @@ Usage: rly-cli tbc-init [options] <token_a> <token_b> <token_b_liquidit>
 Arguments:
   token_a                              token A
   token_b                              token B
-  token_b_liquidit                     token B liquidity
+  token_b_liquidity                     token B liquidity
 
 Options:
   -e, --env <string>                   Solana cluster env name (default: "devnet")
@@ -173,7 +173,7 @@ Options:
   --slope_numerator <string>           slope numerator
   --slope_denominator <string>         slope denominator
   --init_price_a_numerator <string>    initial price token A
-  --init_price_a_denominator <string>  initial price token B
+  --init_price_a_denominator <string>  initial price token A
   -h, --help                           display help for command
 ```
 
