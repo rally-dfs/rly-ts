@@ -1,1 +1,0 @@
-self.__BUILD_MANIFEST = {__rewrites:{beforeFiles:[],afterFiles:[],fallback:[]},"/_error":["static\u002Fchunks\u002Fpages\u002F_error.js"],"/creator/nft":["static\u002Fchunks\u002Fpages\u002Fcreator\u002Fnft.js"],sortedPages:["\u002F_app","\u002F_error","\u002Fcreator\u002Fnft"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
