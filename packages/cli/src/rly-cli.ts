@@ -4,7 +4,7 @@ import { web3, BN } from '@project-serum/anchor';
 import { TOKEN_PROGRAM_ID, Token } from '@solana/spl-token';
 import { NodeWallet } from '@metaplex/js';
 import { program } from 'commander';
-program.version('1.0.5');
+program.version('0.0.5');
 import {
     addMetadata,
     canonicalSwapProgram,
