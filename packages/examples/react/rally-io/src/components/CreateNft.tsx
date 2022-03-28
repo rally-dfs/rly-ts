@@ -1,17 +1,17 @@
 
 import { FC, useState, useEffect } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Button, Grid, TextField,  Box, InputLabel } from '@mui/material';
+import { Button, Grid, TextField, Box, InputLabel } from '@mui/material';
 import Image from 'next/image';
 
 
 const CreateNft: FC = () => {
 
-   
+
     type nftMetaValues = {
         nftName: string,
         nftDescription: string,
-        nftSymbol:String
+        nftSymbol: String
     }
 
     const defaultNftMetaValues = {
@@ -22,30 +22,30 @@ const CreateNft: FC = () => {
 
     const [formValues, setFormValues] = useState(defaultNftMetaValues)
     const [selectedFile, setSelectedFile] = useState()
-    const [ratio, setRatio] = useState(16/9) // default to 16:9
+    const [ratio, setRatio] = useState(16 / 9) // default to 16:9
     const [preview, setPreview] = useState<string | null>(null)
 
     useEffect(() => {
-      if (!selectedFile) {
-          setPreview(null)
-          return
-      }
+        if (!selectedFile) {
+            setPreview(null)
+            return
+        }
 
-      const objectUrl = URL.createObjectURL(selectedFile)
-      setPreview(objectUrl)
+        const objectUrl = URL.createObjectURL(selectedFile)
+        setPreview(objectUrl)
 
-      // free memory when ever this component is unmounted
-      return () => URL.revokeObjectURL(objectUrl)
-  }, [selectedFile])
+        // free memory when ever this component is unmounted
+        return () => URL.revokeObjectURL(objectUrl)
+    }, [selectedFile])
 
 
-  const onSelectFile = (e:any) => {
-      if (!e.target.files || e.target.files.length === 0) {
-          setSelectedFile(undefined)
-          return
-      }
-      setSelectedFile(e.target.files[0])
-  }
+    const onSelectFile = (e: any) => {
+        if (!e.target.files || e.target.files.length === 0) {
+            setSelectedFile(undefined)
+            return
+        }
+        setSelectedFile(e.target.files[0])
+    }
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
@@ -57,8 +57,26 @@ const CreateNft: FC = () => {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        const { nftName, nftDescription } = formValues;
-        console.log(nftName, nftDescription) 
+        const { nftName, nftDescription, nftSymbol } = formValues;
+
+        const img = await fetch('/api/image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nftName, nftDescription, nftSymbol })
+        }).then((res: Response) => res.json())
+
+        console.log(img)
+
+        const data = await fetch('/api/metadata', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nftName, nftDescription, nftSymbol })
+        }).then((res: Response) => res.json())
+        console.log(data)
 
         //upload image 
         // loader
@@ -110,29 +128,29 @@ const CreateNft: FC = () => {
                     />
                 </Grid>
                 <Grid item xs={12} sm={12}>
-                {preview &&  
-                    <Image alt=""
-                     src={preview} 
-                     width={500}
-                     height={500 / ratio}
-                     layout="fixed" // you can use "responsive", "fill" or the default "intrinsic"
-                     onLoadingComplete={({ naturalWidth, naturalHeight }) => 
-                       setRatio(naturalWidth / naturalHeight)
-                     }
-                     
-                     />            
-                 }
-                  <InputLabel id="upload-image">
-                    <Button component="span">Upload Image</Button>
-                      <input
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                      id="upload-image"
-                      multiple
-                      type="file"
-                      onChange={onSelectFile}
-                      />
-                  </InputLabel>
+                    {preview &&
+                        <Image alt=""
+                            src={preview}
+                            width={500}
+                            height={500 / ratio}
+                            layout="fixed" // you can use "responsive", "fill" or the default "intrinsic"
+                            onLoadingComplete={({ naturalWidth, naturalHeight }) =>
+                                setRatio(naturalWidth / naturalHeight)
+                            }
+
+                        />
+                    }
+                    <InputLabel id="upload-image">
+                        <Button component="span">Upload Image</Button>
+                        <input
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            id="upload-image"
+                            multiple
+                            type="file"
+                            onChange={onSelectFile}
+                        />
+                    </InputLabel>
                 </Grid>
             </Grid>
             <Button variant="contained" color="primary" type="submit" sx={{ mt: 3, mb: 2 }}>
