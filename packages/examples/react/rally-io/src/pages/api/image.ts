@@ -1,4 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import fs from 'fs';
+import formidable from 'formidable';
+export const config = {
+    api: {
+        bodyParser: false,
+        externalResolver: true,
+    }
+};
+
 import Arweave from 'arweave'
 
 const host = process.env.AR_HOST;
@@ -10,7 +19,7 @@ const arweave = Arweave.init({
     host,
     port,
     protocol,
-    timeout: 20000,
+    timeout: 25000,
 });
 
 export default async function handler(
@@ -20,14 +29,31 @@ export default async function handler(
 
     if (req.method === 'POST') {
 
-        const arWallet = process.env.TEST_WALLET && JSON.parse(process.env.TEST_WALLET)
+        const arWallet = process.env.WALLET && JSON.parse(process.env.WALLET)
         const address = await arweave.wallets.jwkToAddress(arWallet);
         const winston = await arweave.wallets.getBalance(address);
-        console.log("address = ", address)
-        console.log("balance winstons =", winston)
-        res.status(200).json({
-            body: req.body
+
+        const form = new formidable.IncomingForm();
+        form.parse(req, async (er: any, fields: any, files: any) => {
+
+            const { filepath, mimetype } = files.image;
+
+            let data = fs.readFileSync(filepath);
+
+            const imgTx = await arweave.createTransaction(
+                {
+                    data,
+                },
+                arWallet,
+            );
+            imgTx.addTag('App-Name', 'rally-io-test');
+            imgTx.addTag('Content-Type', mimetype);
+            await arweave.transactions.sign(imgTx, arWallet);
+            await arweave.transactions.post(imgTx);
+            const imageUri = `${protocol}://${host}:${port}/${imgTx.id}`
+            res.status(200).json({ message: "upload successful", imageUri });
         });
+
     } else {
         res.status(405).json({ message: "method not supported" })
     }

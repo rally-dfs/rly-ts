@@ -170,6 +170,7 @@ const ExecuteTbcSwap: FC<swapProps> = ({ tokenList }) => {
     }
 
     useEffect(() => {
+
         const estimate = async () => {
             const { amountB } = await estimateSwapValues()
             console.log(amountB)
@@ -238,7 +239,6 @@ const ExecuteTbcSwap: FC<swapProps> = ({ tokenList }) => {
         }
     };
 
-    console.log(formValues)
 
 
     return (
