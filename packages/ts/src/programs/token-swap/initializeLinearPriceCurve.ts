@@ -2,7 +2,7 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Program, web3, BN, Provider } from '@project-serum/anchor';
 import { config } from "../../../config";
 import { Wallet, NodeWallet } from '@metaplex/js';
-import { generateTokenMintInstructions, generateCreateTokenAccountInstructions } from '../../utils';
+import { generateTokenMintInstructions, generateCreateTokenAccountInstructions, Numberu64 } from '../../utils';
 
 const { accountLayout: { SWAP_ACCOUNT_SPACE } } = config;
 
@@ -78,7 +78,7 @@ export const initializeLinearPriceCurve = async ({
     const { tokenAccount: tokenBTokenAccount, accountIx: createTokenBTokenAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, tokenB, expectedSwapAuthorityPDA)
 
 
-    const tokenBTransferIx = Token.createTransferInstruction(TOKEN_PROGRAM_ID, callerTokenBAccount, tokenBTokenAccount.publicKey, callerTokenBAccountOwner ? callerTokenBAccountOwner.publicKey : wallet.publicKey, [], initialTokenBLiquidity.toNumber())
+    const tokenBTransferIx = Token.createTransferInstruction(TOKEN_PROGRAM_ID, callerTokenBAccount, tokenBTokenAccount.publicKey, callerTokenBAccountOwner ? callerTokenBAccountOwner.publicKey : wallet.publicKey, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer()))
 
     // create token accounts for fees and pool tokens owned by calling account (can't use associated token account as two accounts req'd)
 

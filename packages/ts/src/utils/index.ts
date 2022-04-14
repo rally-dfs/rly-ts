@@ -85,7 +85,7 @@ const TokenSwapLayout = BufferLayout.struct([
     BufferLayout.blob(32, 'curveParameters'),
 ]);
 
-class Numberu64 extends BN {
+export class Numberu64 extends BN {
 
     toBuffer(): Buffer {
         const a = super.toArray().reverse();

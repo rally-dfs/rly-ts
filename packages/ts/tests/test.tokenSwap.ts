@@ -3,9 +3,9 @@ import assert from 'assert';
 
 import { web3, Provider, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
-import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram } from "../src";
+import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "../src";
+
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { getTokenSwapInfo } from "../src/utils";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } = web3;
 
 describe('token swap', () => {
@@ -29,7 +29,7 @@ describe('token swap', () => {
     let tokenBAdmin;
     let tokenBAdminTokenAccount;
     let tokenAAdminTokenAccount;
-    const initialTokenBLiquidity = new BN(200 * 10 ** 8);
+    const initialTokenBLiquidity = new BN(`16000000000000000000`);
     const initialTokenALiquidity = new BN(10000 * 10 ** 8);
     const swapInitAmountTokenA = new BN(2400 * 10 ** 8);
     const decimals = 8
@@ -66,8 +66,8 @@ describe('token swap', () => {
         callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
         tokenBAdminTokenAccount = await tokenB.createAssociatedTokenAccount(tokenBAdmin.publicKey);
         tokenAAdminTokenAccount = await tokenA.createAssociatedTokenAccount(tokenBAdmin.publicKey);
-        await tokenB.mintTo(callerTokenBAccount, payer, [], initialTokenBLiquidity.toNumber());
-        await tokenB.mintTo(tokenBAdminTokenAccount, payer, [], initialTokenBLiquidity.toNumber());
+        await tokenB.mintTo(callerTokenBAccount, payer, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer()));
+        await tokenB.mintTo(tokenBAdminTokenAccount, payer, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer()));
         await tokenA.mintTo(callerTokenAAccount, payer, [], initialTokenALiquidity.toNumber());
         await tokenA.mintTo(tokenAAdminTokenAccount, payer, [], initialTokenALiquidity.toNumber());
 
@@ -195,7 +195,7 @@ describe('token swap', () => {
         assert.ok(usertokenAInfo.amount.eq(new BN(760000000000)));
         assert.ok(usertokenBInfo.amount.eq(new BN(4000000000)));
         assert.ok(swapTokenAInfo.amount.eq(new BN(240000000000)));
-        assert.ok(swapTokenBInfo.amount.eq(new BN(16000000000)));
+        assert.ok(swapTokenBInfo.amount.eq(new BN('70872530412510')));
     })
 
     it('it should estimate the reverse of a token swap', async () => {
@@ -259,7 +259,7 @@ describe('token swap', () => {
         assert.ok(usertokenAInfo.amount.eq(new BN(890000000000)));
         assert.ok(usertokenBInfo.amount.eq(new BN(2000000000)));
         assert.ok(swapTokenAInfo.amount.eq(new BN(110000000000)));
-        assert.ok(swapTokenBInfo.amount.eq(new BN(18000000000)));
+        assert.ok(swapTokenBInfo.amount.eq(new BN('70874530412510')));
     })
 
 })
