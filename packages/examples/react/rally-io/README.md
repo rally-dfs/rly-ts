@@ -9,6 +9,14 @@ npm i
 npm run start
 ```
 
-### deployed version
+## Creating tokens and intializing bonding curves
 
-deployed version [here](https://rly-ts-mexux7zlk-rly-network.vercel.app/) 
+This app uses `rly-ts` to allow creators to create tokens and initialize bonding curves. The `CreateToken` and `InitTbc` components in the component directory execute this functionality. 
+
+## Swaping tokens 
+
+Tokens can be swapped using the swap functionality of the initialized token bonding curves. The `ExecuteTbcSwap` component executes this functionality. The allowed tokens for the swap are pulled from a token list which follows the tokenlist standard initially defined by Uniswap and currently in use on Solana [here](https://github.com/solana-labs/token-list/blob/main/src/tokens/solana.tokenlist.json). To add a token pair to swap they must be added to the token list found at `src/assets/tokenlist.json`
+
+## Creating NFTs
+
+NFTs are created using the [metaplex metadata libraries](https://docs.metaplex.com/token-metadata/Versions/v1.0.0/nft-standard) and arweave for media storage. Media uploads are currently handled with nextjs serverless functions at `src/pages/api/`, note that an Arweave wallet key is required to perform uploads. 
