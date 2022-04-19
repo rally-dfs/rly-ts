@@ -3,7 +3,9 @@ import assert from 'assert';
 
 import { web3, Provider, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
-import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "../src";
+import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "rly-js";
+
+//import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "../src";
 
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } = web3;
@@ -29,7 +31,7 @@ describe('token swap', () => {
     let tokenBAdmin;
     let tokenBAdminTokenAccount;
     let tokenAAdminTokenAccount;
-    const initialTokenBLiquidity = new BN(`16000000000000000000`);
+    const initialTokenBLiquidity = new BN('16000000000000000000');
     const initialTokenALiquidity = new BN(10000 * 10 ** 8);
     const swapInitAmountTokenA = new BN(2400 * 10 ** 8);
     const decimals = 8
