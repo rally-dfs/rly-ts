@@ -1,6 +1,6 @@
-## RLY Example App
+## Rally IO Example App
 
-This is an example react app using the `rly-ts` library to call rly network programs on solana from the browser. This app allows you to mint tokens, initialize token bonding curves and swap tokens on those bonding curves. Given that this is an example app it is currently only set up to run on the solana devnet.
+This is an example react app using the `rly-ts` library to reproduce basic functionality required by a rally-io style app (token minting, bonding curve intialization, nft creation). Given that this is an example app it is currently only set up to run on the solana devnet.
 
 ### running the app locally 
 
@@ -11,7 +11,7 @@ npm run start
 
 ## Creating tokens and intializing bonding curves
 
-This app uses `rly-ts` to allow creators to create tokens and initialize bonding curves. The `CreateToken` and `InitTbc` components in the component directory execute this functionality. 
+This app uses `rly-ts` to allow creators to create tokens and initialize token bonding curves. The `CreateToken` and `InitTbc` components in the component directory execute this functionality. 
 
 ## Swaping tokens 
 
@@ -20,3 +20,4 @@ Tokens can be swapped using the swap functionality of the initialized token bond
 ## Creating NFTs
 
 NFTs are created using the [metaplex metadata libraries](https://docs.metaplex.com/token-metadata/Versions/v1.0.0/nft-standard) and arweave for media storage. Media uploads are currently handled with nextjs serverless functions at `src/pages/api/`, note that an Arweave wallet key is required to perform uploads. 
+
