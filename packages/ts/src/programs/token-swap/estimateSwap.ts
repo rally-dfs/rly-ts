@@ -70,17 +70,14 @@ export const estimateSwap = async ({
     const tx = new Transaction();
     tx.add(Ix);
 
-
     //simulate transaction return simulated state change for userSourceTokenAccount and userDestinationTokenAccount
 
-    const { value: { accounts } } = await simulateTransaction(tx, wallet, connection, { commitment: "confirmed", preflightCommitment: "processed" }, [userSourceTokenAccount, userDestinationTokenAccount]);
-
-    const accountAInfo = await accountInfoFromSim(accounts[0])
-    const accountBInfo = await accountInfoFromSim(accounts[1])
-
-    return { amountTokenAPostSwap: accountAInfo.amount, amountTokenBPostSwap: accountBInfo.amount }
-
-
-
-
+    const { value: { err, logs, accounts } } = await simulateTransaction(tx, wallet, connection, { commitment: "confirmed", preflightCommitment: "processed" }, [userSourceTokenAccount, userDestinationTokenAccount]);
+    if (err) {
+        throw ({ message: "tx simulation error", err, logs })
+    } else {
+        const accountAInfo = await accountInfoFromSim(accounts[0])
+        const accountBInfo = await accountInfoFromSim(accounts[1])
+        return { amountTokenAPostSwap: accountAInfo.amount, amountTokenBPostSwap: accountBInfo.amount }
+    }
 }
