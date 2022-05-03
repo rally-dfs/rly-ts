@@ -124,7 +124,7 @@ describe('token swap', () => {
 
         await connection.confirmTransaction(tx);
 
-        const data = await getTokenSwapInfo(provider, tokenSwapInfo.publicKey, tokenSwap.programId);
+        const data = await getTokenSwapInfo(connection, tokenSwapInfo.publicKey, tokenSwap.programId);
         poolToken = new Token(connection, data.poolToken, TOKEN_PROGRAM_ID, payer)
         feeAccount = data.feeAccount;
         tokenATokenAccount = data.tokenAccountA;

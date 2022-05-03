@@ -18,8 +18,8 @@ import {
     executeSwap,
     tokenSwapProgram,
     getTokenSwapInfo,
-    getTokenAccountInfo
-} from 'rly-js';
+    getTokenAccountInfo,
+} from '../../ts/lib/src';
 
 
 import { loadKeypair, getProvider, getOrCreateAssociatedAccount } from "./utils/utils"
@@ -441,14 +441,15 @@ program
             tokenSwapInfo,
             tokenA: tokenA.publicKey,
             tokenB: tokenB.publicKey,
+            poolTokenDecimals: 9,
             wallet,
             connection,
-            initialTokenBLiquidity
+            initialTokenBLiquidity,
         })
 
         await connection.confirmTransaction(tx)
 
-        const data = await getTokenSwapInfo(provider, tokenSwapInfo.publicKey, tokenSwap.programId);
+        const data = await getTokenSwapInfo(connection, tokenSwapInfo.publicKey, tokenSwap.programId);
         const poolToken = new Token(connection, new PublicKey(data.poolToken), TOKEN_PROGRAM_ID, payer)
         const feeAccount = data.feeAccount;
         const tokenATokenAccount = data.tokenAccountA;
@@ -462,6 +463,64 @@ program
         console.log('pool token public key', poolToken.publicKey.toBase58());
         console.log('fee account public key', feeAccount.toBase58());
         console.log('initial pool token deposit token account', destinationAccount.publicKey.toBase58());
+
+    });
+
+// get token info and metadata
+
+program
+    .command('get-tbc')
+    .argument('<tbc>', 'tbc pubkey')
+    .requiredOption(
+        '-k, --keypair <path>',
+        `Solana wallet location`,
+        '--keypair not provided',
+    )
+    .option(
+        '-e, --env <string>',
+        'Solana cluster env name',
+        'devnet',
+    )
+    .action(async (tbc, options) => {
+
+        // get values from options
+
+        const { env, keypair } = options;
+
+        // connect to cluster and load wallet
+        const { provider, connection } = getProvider(keypair, 'mainnet-beta')
+
+        const tokenSwap = await tokenSwapProgram(provider);
+        //get token swap info
+        const swapInfo = await getTokenSwapInfo(connection, new PublicKey(tbc), tokenSwap.programId)
+
+
+
+        //get token mint data 
+
+        const { decimals: tokenBDecimals } = await getMintInfo({ tokenMint: swapInfo.mintA, connection });
+        const { decimals: tokenADecimals } = await getMintInfo({ tokenMint: swapInfo.mintA, connection });
+
+        //get token account data
+        const tokenAccountAInfo = await getTokenAccountInfo(connection, swapInfo.tokenAccountA);
+        const tokenAccountBInfo = await getTokenAccountInfo(connection, swapInfo.tokenAccountB);
+
+
+        console.log("authority = ", swapInfo.authority.toBase58());
+        console.log("token a account = ", swapInfo.tokenAccountA.toBase58());
+        console.log("token b account = ", swapInfo.tokenAccountB.toBase58());
+        console.log("token account a balance = ", tokenAccountAInfo.amount.div(ten.pow(new BN(tokenADecimals))).toNumber())
+        console.log("token account b balance = ", tokenAccountBInfo.amount.div(ten.pow(new BN(tokenBDecimals))).toNumber())
+        console.log("token a mint = ", swapInfo.mintA.toBase58());
+        console.log("token b mint = ", swapInfo.mintB.toBase58());
+        console.log("trade fee numerator ", swapInfo.tradeFeeNumerator.toNumber());
+        console.log("trade fee denominator", swapInfo.tradeFeeDenominator.toNumber());
+        console.log("owner trade fee numerator", swapInfo.ownerTradeFeeNumerator.toNumber());
+        console.log("owner trade fee denominator", swapInfo.ownerTradeFeeDenominator.toNumber());
+        console.log("owner withdraw fee numerator", swapInfo.ownerWithdrawFeeNumerator.toNumber());
+        console.log("owner withdraw fee denominator", swapInfo.ownerWithdrawFeeDenominator.toNumber());
+        console.log("host fee numerator", swapInfo.hostFeeNumerator.toNumber());
+        console.log("host fee denominator", swapInfo.hostFeeDenominator.toNumber());
 
     });
 
@@ -506,7 +565,7 @@ program
                 tokenSwap.programId
             );
 
-        const swapData = await getTokenSwapInfo(provider, tokenSwapInfo, tokenSwap.programId);
+        const swapData = await getTokenSwapInfo(connection, tokenSwapInfo, tokenSwap.programId);
 
         const callerTokenAAccount = await getOrCreateAssociatedAccount(tokenA, payer.publicKey);
         const callerTokenBAccount = await getOrCreateAssociatedAccount(tokenB, payer.publicKey);
@@ -572,7 +631,7 @@ program
                 tokenSwap.programId
             );
 
-        const swapData = await getTokenSwapInfo(provider, tokenSwapInfo, tokenSwap.programId);
+        const swapData = await getTokenSwapInfo(connection, tokenSwapInfo, tokenSwap.programId);
 
         const swapSourceInfo = await getTokenAccountInfo(connection, swapData.tokenAccountA);
         const swapDestInfo = await getTokenAccountInfo(connection, swapData.tokenAccountB);
