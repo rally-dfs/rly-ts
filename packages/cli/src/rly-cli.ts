@@ -27,12 +27,21 @@ import { loadKeypair, getProvider, getOrCreateAssociatedAccount } from "./utils/
 const { Connection, clusterApiUrl, PublicKey, Keypair } = web3;
 
 
-const canonicalMint = new PublicKey(
+const canonicalMintV3 = new PublicKey(
+    "sRLY3migNrkC1HLgqotpvi66qGkdNedqPZ9TJpAQhyh"
+);
+
+const canonicalDataV3 = new PublicKey(
+    "97exq8nMj13ydaQAwxMN26nfHXtvoVioexYkoB1ZUs2v"
+);
+
+
+const canonicalMintV2 = new PublicKey(
     "RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq"
 );
 
-const canonicalData = new PublicKey(
-    "4wkz5UF7ziY3Kuz1vxkZBakcZrRoTfup4XPASdhDfnpk"
+const canonicalDataV2 = new PublicKey(
+    "61SVmuBgYEChu3vBR4PXtTzHbXYsn78CM7uZCSquieHu"
 );
 
 const wormholeMint = new PublicKey(
@@ -40,7 +49,7 @@ const wormholeMint = new PublicKey(
 );
 
 const wormholeData = new PublicKey(
-    "BuvUZWrTnrBkacCikXsoGW1zA1yMt7D1okq3ZDJrDft8"
+    "FvdfyPydxRgCnFPwBdrx7B1fuBAZFxWCahATumYvzEdv"
 );
 
 
@@ -136,7 +145,7 @@ program
         })
 
         console.log(`metadata successfully added to ${mint}`)
-        console.log(`tx hash = ${tx}`)
+        console.log(`tx sig = ${tx}`)
 
     });
 
@@ -169,6 +178,11 @@ program
 
 program
     .command('get-balance-canonical')
+    .option(
+        '-v, --version <number>',
+        'canonical token version',
+        '3',
+    )
     .requiredOption(
         '-k, --keypair <path>',
         `Solana wallet location`,
@@ -176,16 +190,18 @@ program
     )
     .action(async (options) => {
 
-        const { keypair } = options;
+        const { keypair, version } = options;
         const { wallet, connection } = getProvider(keypair, 'mainnet-beta')
         const { payer } = wallet;
 
+        const canonicalMint = new PublicKey(version === '2' ? canonicalMintV2 : canonicalMintV3)
+
         //decimals of destination-
 
-        const canv1 = new Token(connection, new PublicKey(canonicalMint), TOKEN_PROGRAM_ID, payer);
-        const { decimals } = await canv1.getMintInfo()
-        const associatedTokenAcct = await canv1.getOrCreateAssociatedAccountInfo(wallet.publicKey);
-        const { amount } = await canv1.getAccountInfo(associatedTokenAcct.address);
+        const canv2 = new Token(connection, new PublicKey(canonicalMint), TOKEN_PROGRAM_ID, payer);
+        const { decimals } = await canv2.getMintInfo()
+        const associatedTokenAcct = await canv2.getOrCreateAssociatedAccountInfo(wallet.publicKey);
+        const { amount } = await canv2.getAccountInfo(associatedTokenAcct.address);
 
         const canBalance = new BN(amount);
 
@@ -220,6 +236,11 @@ program
 
 program
     .command('swap-canonical-wormhole')
+    .option(
+        '-v, --version <number>',
+        'canonical token version',
+        '3',
+    )
     .requiredOption(
         '-a, --amount <string>',
         'amount',
@@ -231,7 +252,7 @@ program
     )
     .option(
         '-w, --wormhole_token_account <string>',
-        'destination account (if not included uses associated token acct)',
+        'source account (if not included uses associated token acct)',
     )
     .option(
         '-c, --canonical_token_account <string>',
@@ -239,12 +260,14 @@ program
     )
     .action(async options => {
 
-        const { env, keypair, wormhole_token_account, canonical_token_account } = options;
+        const { version, keypair, wormhole_token_account, canonical_token_account } = options;
         let { amount } = options;
         const { provider, wallet, connection } = getProvider(keypair, 'mainnet-beta')
         const { payer } = wallet;
         const canSwap = await canonicalSwapProgram(provider);
 
+        const canonicalMint = new PublicKey(version === '2' ? canonicalMintV2 : canonicalMintV3)
+        const canonicalData = new PublicKey(version === '2' ? canonicalDataV2 : canonicalDataV3)
 
         let { decimals } = await canSwap.account.wrappedData.fetch(wormholeData)
 
@@ -288,11 +311,10 @@ program
             connection
         })
 
-        console.log(tx)
-
         await connection.confirmTransaction(tx)
 
         console.log(`${destAmount.div(ten.pow(decimals)).toNumber()} of ${canonicalMint} swapped for ${wormholeMint} sent to ${wormholeTokenAccount.toBase58()} `)
+        console.log(`tx sig = ${tx}`)
 
     });
 
@@ -304,8 +326,13 @@ program
         'amount',
     )
     .option(
+        '-v, --version <number>',
+        'canonical token version',
+        '3',
+    )
+    .option(
         '-w, --wormhole_token_account <string>',
-        'destination account (if not included uses associated token acct)',
+        'source account (if not included uses associated token acct)',
     )
     .option(
         '-c, --canonical_token_account <string>',
@@ -318,11 +345,15 @@ program
     )
     .action(async options => {
 
-        const { keypair, wormhole_token_account, canonical_token_account } = options;
+        const { keypair, wormhole_token_account, canonical_token_account, version } = options;
         let { amount } = options;
         const { provider, wallet, connection } = getProvider(keypair, 'mainnet-beta')
         const { payer } = wallet;
         const canSwap = await canonicalSwapProgram(provider);
+
+
+        const canonicalMint = new PublicKey(version === '2' ? canonicalMintV2 : canonicalMintV3)
+        const canonicalData = new PublicKey(version === '2' ? canonicalDataV2 : canonicalDataV3)
 
 
         let { decimals } = await canSwap.account.canonicalData.fetch(canonicalData)
@@ -368,11 +399,95 @@ program
             connection
         })
 
-        console.log(tx)
-
         await connection.confirmTransaction(tx)
 
         console.log(`${destAmount.div(ten.pow(decimals)).toNumber()} of ${wormholeMint} swapped for ${canonicalMint} sent to ${canonicalTokenAccount.toBase58()} `)
+        console.log(`tx sig = ${tx}`)
+
+    });
+
+program
+    .command('swap-v2-v3')
+    .option(
+        '-a, --amount <string>',
+        'amount',
+    )
+    .option(
+        '-v2, --v2_token_account <string>',
+        'source account (if not included uses associated token acct)',
+    )
+    .option(
+        '-v3, --v3_token_account <string>',
+        'destination account (if not included uses associated token acct)',
+    )
+    .requiredOption(
+        '-k, --keypair <path>',
+        `Solana wallet location`,
+        '--keypair not provided',
+    )
+    .action(async options => {
+
+        const { keypair, v2_token_account, v3_token_account } = options;
+        let { amount } = options;
+        const { provider, wallet, connection } = getProvider(keypair, 'mainnet-beta')
+        const { payer } = wallet;
+        const canSwap = await canonicalSwapProgram(provider);
+
+
+        const v2Mint = new PublicKey(canonicalMintV2)
+        const v2Data = new PublicKey(canonicalDataV2)
+
+        const v3Mint = new PublicKey(canonicalMintV3)
+        const v3Data = new PublicKey(canonicalDataV3)
+
+
+        let { decimals } = await canSwap.account.canonicalData.fetch(v3Data)
+
+        const ten = new BN(10)
+        decimals = new BN(decimals)
+        let destAmount = new BN(amount)
+
+        //convert to decimal units
+        destAmount = destAmount.mul(ten.pow(decimals))
+
+        //decimals of destination-
+
+        const v2Token = new Token(connection, new PublicKey(v2Mint), TOKEN_PROGRAM_ID, payer)
+        const v3Token = new Token(connection, new PublicKey(v3Mint), TOKEN_PROGRAM_ID, payer)
+
+        const { decimals: v2Dec } = await v2Token.getMintInfo()
+
+        const v2TokenAccount = v2_token_account ? new PublicKey(v2_token_account) : await getOrCreateAssociatedAccount(v2Token, wallet.payer.publicKey);
+        const v3TokenAccount = v3_token_account ? new PublicKey(v3_token_account) : await getOrCreateAssociatedAccount(v3Token, wallet.payer.publicKey);
+
+
+        let { amount: v2Amount } = await v2Token.getAccountInfo(v2TokenAccount);
+
+        const v2Bal = new BN(v2Amount)
+
+        const balance = v2Bal.div(ten.pow(new BN(v2Dec))).toNumber();
+
+        if (balance < Number(amount)) {
+            return console.log(`insufficent funds, your wormhole $sRLYv2 balance is currently ${balance} `)
+        }
+
+        const tx = await swapWrappedForCanonical({
+            canSwap,
+            canonicalMint: v3Mint,
+            wrappedMint: v2Mint,
+            canonicalData: v3Data,
+            wrappedData: v2Data,
+            sourceTokenAccount: v2TokenAccount,
+            destinationTokenAccount: v3TokenAccount,
+            destinationAmount: destAmount,
+            wallet,
+            connection
+        })
+
+        await connection.confirmTransaction(tx)
+
+        console.log(`${destAmount.div(ten.pow(decimals)).toNumber()} of ${canonicalMintV2} swapped for ${canonicalMintV3} sent to ${v3TokenAccount.toBase58()} `)
+        console.log(`tx sig = ${tx}`)
 
     });
 
@@ -493,8 +608,6 @@ program
         const tokenSwap = await tokenSwapProgram(provider);
         //get token swap info
         const swapInfo = await getTokenSwapInfo(connection, new PublicKey(tbc), tokenSwap.programId)
-
-
 
         //get token mint data 
 

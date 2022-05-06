@@ -29,7 +29,7 @@ export const initializeCanonicalToken = async ({
     const provider = new Provider(connection, wallet, { commitment: "confirmed", preflightCommitment: "processed" });
     const transaction = new Transaction();
 
-    const [expectedMintAuthorityPDA, expectedMintAuthorityBump] =
+    const [expectedMintAuthorityPDA] =
         await PublicKey.findProgramAddress(
             [CANONICAL_MINT_AUTHORITY_PDA_SEED, canonicalMint.toBuffer()],
             canSwap.programId
@@ -41,7 +41,6 @@ export const initializeCanonicalToken = async ({
     )
 
     const initIx = canSwap.instruction.initializeCanonicalToken(
-        expectedMintAuthorityBump,
         {
             accounts: {
                 initializer: canonicalAuthority,

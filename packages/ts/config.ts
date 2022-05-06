@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 
 export const config = {
     programs: {
-        canonicalSwap: 'CSWAPqg5XDRcknL2CmDVtmBHX2KFEnaLZgHFCC89nhDk',
+        canonicalSwap: 'CSwAp3hdedZJBmhWMjv8BJ7anTLMQ2hBqKdnXV5bB3Nz',
         tokenSwap: 'TBCwReYDDw8SvwVVKJHgatzeXKrLHnaTPyDGwkUoBsq',
         token: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
     },
@@ -13,7 +13,7 @@ export const config = {
     },
     accountLayout: {
         SWAP_ACCOUNT_SPACE: 324,
-        WRAPPED_DATA_SPACE: 8 + 66,
-        CANONICAL_DATA_SPACE: 8 + 65
+        WRAPPED_DATA_SPACE: 8 + 68,
+        CANONICAL_DATA_SPACE: 8 + 66
     }
 };

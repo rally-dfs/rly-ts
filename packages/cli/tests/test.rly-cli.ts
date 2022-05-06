@@ -101,6 +101,11 @@ describe("rly-cli", () => {
         const result = test("tbc-init", `${tokenA.publicKey.toBase58()} ${tokenB.publicKey.toBase58()} ${initialTokenBLiquidity.toNumber()} -k ${process.env.KEYPAIR_DEVNET} --slope_numerator 1 --slope_denominator 200000000 --init_price_a_numerator 50 --init_price_a_denominator 1`)
         tbcPubKey = result.trim().split(/\s+/)[7];
     });
+    it("it should get a tbc", async () => {
+        const { payer } = wallet;
+        const result = test("get-tbc", `${tbcPubKey} -k ${process.env.KEYPAIR_DEVNET}`)
+        tbcPubKey = result.trim().split(/\s+/)[7];
+    });
     it("it should estimate swap on tbc", async () => {
         const { payer } = wallet;
         const result = test("tbc-swap-estimate", `${tbcPubKey} ${tokenA.publicKey.toBase58()} ${tokenB.publicKey.toBase58()} ${swapInitAmountTokenA.toNumber()} -k ${process.env.KEYPAIR_DEVNET}`)

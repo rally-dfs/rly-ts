@@ -35,7 +35,7 @@ export const swapWrappedForCanonical = async ({
     const provider = new Provider(connection, wallet, { commitment: "confirmed", preflightCommitment: "processed" });
     const transaction = new Transaction();
 
-    const [expectedMintAuthorityPDA, expectedMintAuthorityBump] =
+    const [expectedMintAuthorityPDA] =
         await web3.PublicKey.findProgramAddress(
             [CANONICAL_MINT_AUTHORITY_PDA_SEED, canonicalMint.toBuffer()],
             canSwap.programId
@@ -48,7 +48,6 @@ export const swapWrappedForCanonical = async ({
 
     const ix = canSwap.instruction.swapWrappedForCanonical(
         destinationAmount,
-        expectedMintAuthorityBump,
         {
             accounts: {
                 user: wallet.publicKey,

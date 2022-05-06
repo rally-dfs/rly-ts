@@ -9,6 +9,7 @@
     "test-cs": "./node_modules/ts-mocha/bin/ts-mocha -p ./tsconfig.json -t 1000000 tests/test.canSwap.ts",
     "test-tbc": "./node_modules/ts-mocha/bin/ts-mocha -p ./tsconfig.json -t 1000000 tests/test.tokenSwap.ts",
     "test-token": "./node_modules/ts-mocha/bin/ts-mocha -p ./tsconfig.json -t 1000000 tests/test.token.ts",
+    "test-freeze": "./node_modules/ts-mocha/bin/ts-mocha -p ./tsconfig.json -t 1000000 tests/test.freezeTbc.ts",
     "tsc": "tsc"
   },
   "publishConfig": {

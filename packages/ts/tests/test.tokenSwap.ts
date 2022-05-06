@@ -10,7 +10,7 @@ import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } = web3;
 
-describe('token swap', () => {
+describe('freeze swap', () => {
 
     let provider;
     let wallet;

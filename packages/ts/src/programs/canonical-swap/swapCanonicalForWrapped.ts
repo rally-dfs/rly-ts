@@ -41,7 +41,7 @@ export const swapCanonicalForWrapped = async ({
         canSwap.programId
     );
 
-    const [wrappedTokenAccountAuthority, wrappedTokenAccountAuthorityBump] =
+    const [wrappedTokenAccountAuthority] =
         await PublicKey.findProgramAddress(
             [
                 WRAPPED_TOKEN_OWNER_AUTHORITY_PDA_SEED,
@@ -55,7 +55,6 @@ export const swapCanonicalForWrapped = async ({
 
     const ix = canSwap.instruction.swapCanonicalForWrapped(
         destinationAmount,
-        wrappedTokenAccountAuthorityBump,
         {
             accounts: {
                 user: wallet.publicKey,
