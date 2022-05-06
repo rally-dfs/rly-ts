@@ -12,10 +12,12 @@ interface createTokenParams {
     tokenData: TokenData;
     connection: any;
     wallet: Wallet;
+    //if true caller wallet will retain freeze authority over the token
+    freezeAuthority: boolean;
 }
 
 
-export const createToken = async ({ initialSupply, tokenData, connection, wallet } = {} as createTokenParams) => {
+export const createToken = async ({ initialSupply, tokenData, connection, wallet, freezeAuthority } = {} as createTokenParams) => {
 
     // create token mint 
 
@@ -25,7 +27,12 @@ export const createToken = async ({ initialSupply, tokenData, connection, wallet
 
     // create mint
 
-    const { tokenIx, tokenMint } = await generateTokenMintInstructions(connection, wallet, wallet.publicKey, wallet.publicKey, tokenData.decimals)
+    const { tokenIx, tokenMint } = await generateTokenMintInstructions(
+        connection,
+        wallet,
+        wallet.publicKey,
+        freezeAuthority ? wallet.publicKey : null,
+        tokenData.decimals)
 
     // create associated account to receive tokens
 

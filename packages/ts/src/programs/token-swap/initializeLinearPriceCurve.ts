@@ -78,7 +78,13 @@ export const initializeLinearPriceCurve = async ({
     const { tokenAccount: tokenBTokenAccount, accountIx: createTokenBTokenAccountIx } = await generateCreateTokenAccountInstructions(connection, wallet, tokenB, expectedSwapAuthorityPDA)
 
 
-    const tokenBTransferIx = Token.createTransferInstruction(TOKEN_PROGRAM_ID, callerTokenBAccount, tokenBTokenAccount.publicKey, callerTokenBAccountOwner ? callerTokenBAccountOwner.publicKey : wallet.publicKey, [], Numberu64.fromBuffer(initialTokenBLiquidity.toArrayLike(Buffer)))
+    const tokenBTransferIx = Token.createTransferInstruction(
+        TOKEN_PROGRAM_ID,
+        callerTokenBAccount,
+        tokenBTokenAccount.publicKey,
+        callerTokenBAccountOwner ? callerTokenBAccountOwner.publicKey : wallet.publicKey,
+        [],
+        Numberu64.fromBuffer(initialTokenBLiquidity.toArrayLike(Buffer, 'le', 8)))
 
     // create token accounts for fees and pool tokens owned by calling account (can't use associated token account as two accounts req'd)
 

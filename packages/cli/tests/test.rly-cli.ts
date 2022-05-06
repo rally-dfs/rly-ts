@@ -4,6 +4,8 @@ import { web3, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
 import { TOKEN_PROGRAM_ID, Token } from '@solana/spl-token';
 
+import { getTokenAccountInfo } from '../../ts/src';
+
 import { loadKeypair } from "../src/utils/utils"
 const { Keypair, Connection, clusterApiUrl } = web3;
 
@@ -20,6 +22,7 @@ describe("rly-cli", () => {
     let tokenB;
     let callerTokenBAccount;
     let callerTokenAAccount;
+    let tokenAAccountToFreeze;
     const initialTokenBLiquidity = new BN(500 * 10 ** 8);
     const initialTokenALiquidity = new BN(10000 * 10 ** 8);
     const swapInitAmountTokenA = new BN(2400 * 10 ** 8);
@@ -37,7 +40,7 @@ describe("rly-cli", () => {
             connection,
             payer,
             payer.publicKey,
-            null,
+            payer.publicKey,
             decimals,
             TOKEN_PROGRAM_ID
         );
@@ -54,6 +57,7 @@ describe("rly-cli", () => {
 
         callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
         callerTokenAAccount = await tokenA.createAssociatedTokenAccount(payer.publicKey);
+        tokenAAccountToFreeze = await tokenA.createAccount(payer.publicKey)
         await tokenB.mintTo(callerTokenBAccount, payer, [], initialTokenBLiquidity.toNumber());
         await tokenA.mintTo(callerTokenAAccount, payer, [], initialTokenALiquidity.toNumber());
     })
@@ -79,21 +83,27 @@ describe("rly-cli", () => {
         const resString = result.trim().split(' ')[0];
         assert.strictEqual(resString, "mint")
     });
-    it("it should get canonical token balance", async () => {
+
+    it("it should freeze a token account", async () => {
+
         const { payer } = wallet;
-        const result = test("get-balance-canonical", `-k ${process.env.KEYPAIR_MAINNET}`)
+        const result = test("freeze-token-account", `${tokenA.publicKey.toBase58()} ${tokenAAccountToFreeze.toBase58()} -k ${process.env.KEYPAIR_DEVNET}`)
+        const acctInfo = await getTokenAccountInfo(connection, tokenAAccountToFreeze);
+        assert.equal(acctInfo.state, 2);
+    });
+
+
+    it("it should get canonical token balance", async () => {
+        const result = test("get-balance-canonical", `-k ${process.env.KEYPAIR_MAINNET} -v 2`)
     });
 
     it("it should get wormhole token balance", async () => {
-        const { payer } = wallet;
         const result = test("get-balance-wormhole", `-k ${process.env.KEYPAIR_MAINNET}`)
     });
     it("it should swap canonical rally for wormhole rally", async () => {
-        const { payer } = wallet;
         const result = test("swap-canonical-wormhole", `-k ${process.env.KEYPAIR_MAINNET} -a 5 `)
     });
     it("it should swap wormhole rally for canonical rally", async () => {
-        const { payer } = wallet;
         const result = test("swap-wormhole-canonical", `-k ${process.env.KEYPAIR_MAINNET} -a 5 `)
     });
     it("it should initialize a tbc", async () => {
@@ -101,16 +111,16 @@ describe("rly-cli", () => {
         const result = test("tbc-init", `${tokenA.publicKey.toBase58()} ${tokenB.publicKey.toBase58()} ${initialTokenBLiquidity.toNumber()} -k ${process.env.KEYPAIR_DEVNET} --slope_numerator 1 --slope_denominator 200000000 --init_price_a_numerator 50 --init_price_a_denominator 1`)
         tbcPubKey = result.trim().split(/\s+/)[7];
     });
+    it("it should get a tbc", async () => {
+        const result = test("get-tbc", `${tbcPubKey} -k ${process.env.KEYPAIR_DEVNET}`)
+    });
     it("it should estimate swap on tbc", async () => {
-        const { payer } = wallet;
         const result = test("tbc-swap-estimate", `${tbcPubKey} ${tokenA.publicKey.toBase58()} ${tokenB.publicKey.toBase58()} ${swapInitAmountTokenA.toNumber()} -k ${process.env.KEYPAIR_DEVNET}`)
     });
     it("it should execute swap on tbc", async () => {
-        const { payer } = wallet;
         const result = test("tbc-swap", `${tbcPubKey} ${tokenA.publicKey.toBase58()} ${tokenB.publicKey.toBase58()} ${swapInitAmountTokenA.toNumber()} -k ${process.env.KEYPAIR_DEVNET}`)
     });
     it("it should execute reverse swap on tbc", async () => {
-        const { payer } = wallet;
         const result = test("tbc-swap", `${tbcPubKey} ${tokenB.publicKey.toBase58()} ${tokenA.publicKey.toBase58()} ${swapInitAmountTokenA.toNumber()} -k ${process.env.KEYPAIR_DEVNET}`)
     });
 

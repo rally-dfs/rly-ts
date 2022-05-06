@@ -35,13 +35,13 @@ export const initializeWrappedToken = async ({
     const provider = new Provider(connection, wallet, { commitment: "confirmed", preflightCommitment: "processed" });
     const transaction = new Transaction();
 
-    const [wrappedTokenAccount, wrappedTokenAccountBump] =
+    const [wrappedTokenAccount] =
         await PublicKey.findProgramAddress(
             [TOKEN_ACCOUNT_PDA_SEED, canonicalMint.toBuffer(), wrappedMint.toBuffer()],
             canSwap.programId
         );
 
-    const [wrappedTokenAccountAuthority, wrappedTokenAccountAuthorityBump] =
+    const [wrappedTokenAccountAuthority] =
         await PublicKey.findProgramAddress(
             [
                 WRAPPED_TOKEN_OWNER_AUTHORITY_PDA_SEED,
@@ -57,8 +57,6 @@ export const initializeWrappedToken = async ({
     )
 
     const initIx = await canSwap.instruction.initializeWrappedToken(
-        wrappedTokenAccountBump,
-        wrappedTokenAccountAuthorityBump,
         {
             accounts: {
                 currentAuthority: canonicalAuthority.publicKey,

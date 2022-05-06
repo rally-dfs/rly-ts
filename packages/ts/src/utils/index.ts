@@ -124,7 +124,7 @@ export const accountInfoFromSim = async (account: any) => {
 
 export const getTokenAccountInfo = async (connection: web3.Connection, address: web3.PublicKey) => {
 
-    const data = await connection.getAccountInfo(address);
+    const { data } = await connection.getAccountInfo(address);
     const accountInfo = AccountLayout.decode(data);
     accountInfo.mint = new PublicKey(accountInfo.mint);
     accountInfo.owner = new PublicKey(accountInfo.owner);
@@ -133,9 +133,9 @@ export const getTokenAccountInfo = async (connection: web3.Connection, address: 
 
 }
 
-export const getTokenSwapInfo = async (provider: Provider, swapInfoPubKey: web3.PublicKey, programId: web3.PublicKey) => {
+export const getTokenSwapInfo = async (connection: web3.Connection, swapInfoPubKey: web3.PublicKey, programId: web3.PublicKey) => {
 
-    const data = await loadAccount(provider.connection, swapInfoPubKey, programId);
+    const data = await loadAccount(connection, swapInfoPubKey, programId);
     const tokenSwapData = TokenSwapLayout.decode(data);
     if (!tokenSwapData.isInitialized) {
         throw new Error(`Invalid token swap state`);

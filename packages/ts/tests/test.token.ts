@@ -2,7 +2,7 @@ import { web3, BN, Provider } from "@project-serum/anchor"
 import assert from 'assert';
 import { Token, TOKEN_PROGRAM_ID, u64, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { NodeWallet } from "@metaplex/js";
-import { addMetadata, createToken, getMetadata, transferToken } from "../src"
+import { addMetadata, createToken, getMetadata, getMintInfo, getTokenAccountInfo } from "../src"
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
 
@@ -34,11 +34,35 @@ describe('spl token', () => {
             initialSupply,
             tokenData: { name, symbol, decimals },
             connection,
-            wallet
+            wallet,
+            freezeAuthority: true,
         }))
 
         await connection.confirmTransaction(tx)
         const data = await getMetadata({ tokenMint, connection })
+        const mintInfo = await getMintInfo({ tokenMint, connection })
+
+        assert.strictEqual(mintInfo.freezeAuthority.toBase58(), wallet.publicKey.toBase58())
+        assert.strictEqual(data.name, name);
+        assert.strictEqual(data.symbol, symbol);
+
+    })
+
+    it('should create a new spl token with metadata and no freeze authority', async () => {
+
+        ({ tx, tokenMint } = await createToken({
+            initialSupply,
+            tokenData: { name, symbol, decimals },
+            connection,
+            wallet,
+            freezeAuthority: false,
+        }))
+
+        await connection.confirmTransaction(tx)
+        const data = await getMetadata({ tokenMint, connection })
+        const mintInfo = await getMintInfo({ tokenMint, connection })
+
+        assert.strictEqual(mintInfo.freezeAuthority, null)
         assert.strictEqual(data.name, name);
         assert.strictEqual(data.symbol, symbol);
 
@@ -66,7 +90,6 @@ describe('spl token', () => {
             [],
             new u64(initialSupply.toString())
         )
-
 
         const tx = await addMetadata({
             tokenMint,

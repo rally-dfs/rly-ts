@@ -1,5 +1,5 @@
 {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "name": "canonical_swap",
     "instructions": [
         {
@@ -36,12 +36,7 @@
                     "isSigner": false
                 }
             ],
-            "args": [
-                {
-                    "name": "canonicalMintAuthorityBump",
-                    "type": "u8"
-                }
-            ]
+            "args": []
         },
         {
             "name": "initializeWrappedToken",
@@ -92,16 +87,7 @@
                     "isSigner": false
                 }
             ],
-            "args": [
-                {
-                    "name": "wrappedTokenAccountBump",
-                    "type": "u8"
-                },
-                {
-                    "name": "wrappedTokenAccountAuthorityBump",
-                    "type": "u8"
-                }
-            ]
+            "args": []
         },
         {
             "name": "swapWrappedForCanonical",
@@ -156,10 +142,6 @@
                 {
                     "name": "canonicalAmount",
                     "type": "u64"
-                },
-                {
-                    "name": "canonicalMintAuthorityBump",
-                    "type": "u8"
                 }
             ]
         },
@@ -216,15 +198,11 @@
                 {
                     "name": "wrappedAmount",
                     "type": "u64"
-                },
-                {
-                    "name": "wrappedTokenAccountAuthorityBump",
-                    "type": "u8"
                 }
             ]
         },
         {
-            "name": "pauseWrappedToken",
+            "name": "enableWrappedToken",
             "accounts": [
                 {
                     "name": "currentAuthority",
@@ -242,10 +220,15 @@
                     "isSigner": false
                 }
             ],
-            "args": []
+            "args": [
+                {
+                    "name": "directionSwapWrapped",
+                    "type": "bool"
+                }
+            ]
         },
         {
-            "name": "unpauseWrappedToken",
+            "name": "disableWrappedToken",
             "accounts": [
                 {
                     "name": "currentAuthority",
@@ -263,7 +246,12 @@
                     "isSigner": false
                 }
             ],
-            "args": []
+            "args": [
+                {
+                    "name": "directionSwapWrapped",
+                    "type": "bool"
+                }
+            ]
         },
         {
             "name": "setCanonicalSwapAuthority",
@@ -304,6 +292,10 @@
                     {
                         "name": "decimals",
                         "type": "u8"
+                    },
+                    {
+                        "name": "canonicalMintAuthorityBump",
+                        "type": "u8"
                     }
                 ]
             }
@@ -326,7 +318,15 @@
                         "type": "u8"
                     },
                     {
-                        "name": "paused",
+                        "name": "wrappedTokenAccountAuthorityBump",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "swapWrappedForCanonicalEnabled",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "swapCanonicalForWrappedEnabled",
                         "type": "bool"
                     }
                 ]

@@ -3,9 +3,7 @@ import assert from 'assert';
 
 import { web3, Provider, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
-import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "rly-js";
-
-//import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "../src";
+import { initializeLinearPriceCurve, executeSwap, estimateSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "../src";
 
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } = web3;
@@ -31,7 +29,8 @@ describe('token swap', () => {
     let tokenBAdmin;
     let tokenBAdminTokenAccount;
     let tokenAAdminTokenAccount;
-    const initialTokenBLiquidity = new BN('16000000000000000000');
+    const initialTokenBSupply = new BN('2100000000000000');
+    const initialTokenBLiquidity = new BN('1600000000000000');
     const initialTokenALiquidity = new BN(10000 * 10 ** 8);
     const swapInitAmountTokenA = new BN(2400 * 10 ** 8);
     const decimals = 8
@@ -68,8 +67,8 @@ describe('token swap', () => {
         callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
         tokenBAdminTokenAccount = await tokenB.createAssociatedTokenAccount(tokenBAdmin.publicKey);
         tokenAAdminTokenAccount = await tokenA.createAssociatedTokenAccount(tokenBAdmin.publicKey);
-        await tokenB.mintTo(callerTokenBAccount, payer, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer()));
-        await tokenB.mintTo(tokenBAdminTokenAccount, payer, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer()));
+        await tokenB.mintTo(callerTokenBAccount, payer, [], Numberu64.fromBuffer(initialTokenBSupply.toBuffer('le', 8)));
+        await tokenB.mintTo(tokenBAdminTokenAccount, payer, [], Numberu64.fromBuffer(initialTokenBSupply.toBuffer('le', 8)));
         await tokenA.mintTo(callerTokenAAccount, payer, [], initialTokenALiquidity.toNumber());
         await tokenA.mintTo(tokenAAdminTokenAccount, payer, [], initialTokenALiquidity.toNumber());
 
@@ -124,14 +123,19 @@ describe('token swap', () => {
 
         await connection.confirmTransaction(tx);
 
-        const data = await getTokenSwapInfo(provider, tokenSwapInfo.publicKey, tokenSwap.programId);
+        const data = await getTokenSwapInfo(connection, tokenSwapInfo.publicKey, tokenSwap.programId);
         poolToken = new Token(connection, data.poolToken, TOKEN_PROGRAM_ID, payer)
         feeAccount = data.feeAccount;
         tokenATokenAccount = data.tokenAccountA;
         tokenBTokenAccount = data.tokenAccountB;
         const { amount: feeAmount } = await poolToken.getAccountInfo(feeAccount);
         const { amount: destinationAmount } = await poolToken.getAccountInfo(destinationAccount.publicKey)
+        const { amount: tokenAccountAmount } = await tokenB.getAccountInfo(tokenBTokenAccount);
+        const { amount: userAccountAmount } = await tokenB.getAccountInfo(tokenBAdminTokenAccount);
 
+
+        assert.equal(Numberu64.fromBuffer(tokenAccountAmount.toBuffer('le', 8)).toString(), '1600000000000000')
+        assert.equal(Numberu64.fromBuffer(userAccountAmount.toBuffer('le', 8)).toString(), '500000000000000')
         assert.ok(feeAmount.eq(new BN(0)));
         assert.ok(destinationAmount.eq(new BN(10 * 10 ** 8)));
 
@@ -159,8 +163,9 @@ describe('token swap', () => {
             connection
         })
 
+
         assert.ok(amountTokenAPostSwap.eq(new BN(760000000000)));
-        assert.ok(amountTokenBPostSwap.eq(new BN(4000000000)));
+        assert.ok(amountTokenBPostSwap.eq(new BN(500004000000000)));
 
     })
 
@@ -189,15 +194,15 @@ describe('token swap', () => {
 
         await connection.confirmTransaction(tx)
 
-        const usertokenAInfo = await tokenA.getAccountInfo(tokenAAdminTokenAccount);
-        const usertokenBInfo = await tokenB.getAccountInfo(tokenBAdminTokenAccount);
+        const userTokenAInfo = await tokenA.getAccountInfo(tokenAAdminTokenAccount);
+        const userTokenBInfo = await tokenB.getAccountInfo(tokenBAdminTokenAccount);
         const swapTokenAInfo = await tokenA.getAccountInfo(tokenATokenAccount);
         const swapTokenBInfo = await tokenB.getAccountInfo(tokenBTokenAccount);
 
-        assert.ok(usertokenAInfo.amount.eq(new BN(760000000000)));
-        assert.ok(usertokenBInfo.amount.eq(new BN(4000000000)));
+        assert.ok(userTokenAInfo.amount.eq(new BN(760000000000)));
+        assert.ok(userTokenBInfo.amount.eq(new BN(`500004000000000`)));
         assert.ok(swapTokenAInfo.amount.eq(new BN(240000000000)));
-        assert.ok(swapTokenBInfo.amount.eq(new BN('70872530412510')));
+        assert.ok(swapTokenBInfo.amount.eq(new BN(`1599996000000000`)));
     })
 
     it('it should estimate the reverse of a token swap', async () => {
@@ -222,7 +227,7 @@ describe('token swap', () => {
         })
 
         assert.ok(userDestinationTokenAmount.eq(new BN(890000000000)));
-        assert.ok(userSourceTokenAmount.eq(new BN(2000000000)));
+        assert.ok(userSourceTokenAmount.eq(new BN('500002000000000')));
 
     })
 
@@ -253,15 +258,15 @@ describe('token swap', () => {
 
         await connection.confirmTransaction(tx)
 
-        const usertokenAInfo = await tokenA.getAccountInfo(tokenAAdminTokenAccount);
-        const usertokenBInfo = await tokenB.getAccountInfo(tokenBAdminTokenAccount);
+        const userTokenAInfo = await tokenA.getAccountInfo(tokenAAdminTokenAccount);
+        const userTokenBInfo = await tokenB.getAccountInfo(tokenBAdminTokenAccount);
         const swapTokenAInfo = await tokenA.getAccountInfo(tokenATokenAccount);
         const swapTokenBInfo = await tokenB.getAccountInfo(tokenBTokenAccount);
 
-        assert.ok(usertokenAInfo.amount.eq(new BN(890000000000)));
-        assert.ok(usertokenBInfo.amount.eq(new BN(2000000000)));
+        assert.ok(userTokenAInfo.amount.eq(new BN(890000000000)));
+        assert.ok(userTokenBInfo.amount.eq(new BN('500002000000000')));
         assert.ok(swapTokenAInfo.amount.eq(new BN(110000000000)));
-        assert.ok(swapTokenBInfo.amount.eq(new BN('70874530412510')));
+        assert.ok(swapTokenBInfo.amount.eq(new BN('1599998000000000')));
     })
 
 })
