@@ -85,6 +85,10 @@ program
         '-e, --env <string>',
         'Solana cluster env name',
         'devnet',
+    ).requiredOption(
+        '-k, --keypair <path>',
+        `Solana wallet location`,
+        '--keypair not provided',
     )
     .action(freezeAccountCommand);
 

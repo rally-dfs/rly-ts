@@ -55,7 +55,7 @@ export const initTbcCommand = async (token_a, token_b, token_b_liquidity, option
 
 
     console.log('tcb succesfully initalized');
-    console.log('new pool public key', tokenSwapInfo.publicKey.toBase58());
+    console.log('new tbc public key', tokenSwapInfo.publicKey.toBase58());
     console.log('swap token account A', tokenATokenAccount.toBase58());
     console.log('swap token account B', tokenBTokenAccount.toBase58());
     console.log('pool token public key', poolToken.publicKey.toBase58());

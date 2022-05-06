@@ -1,6 +1,6 @@
 {
   "name": "rly-js",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",

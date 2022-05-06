@@ -16,9 +16,10 @@ export const getTbcCommand = async (tbc, options) => {
     const { env, keypair } = options;
 
     // connect to cluster and load wallet
-    const { provider, connection } = getProvider(keypair, 'mainnet-beta')
+    const { provider, connection } = getProvider(keypair, env)
 
     const tokenSwap = await tokenSwapProgram(provider);
+
     //get token swap info
     const swapInfo = await getTokenSwapInfo(connection, new PublicKey(tbc), tokenSwap.programId)
 

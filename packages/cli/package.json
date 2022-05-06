@@ -1,6 +1,6 @@
 {
   "name": "rly-cli",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "",
   "bin": {
     "rly-cli": "./lib/rly-cli.js"
