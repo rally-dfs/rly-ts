@@ -4,6 +4,8 @@ import { web3, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
 import { TOKEN_PROGRAM_ID, Token } from '@solana/spl-token';
 
+import { getTokenAccountInfo } from '../../ts/src';
+
 import { loadKeypair } from "../src/utils/utils"
 const { Keypair, Connection, clusterApiUrl } = web3;
 
@@ -20,6 +22,7 @@ describe("rly-cli", () => {
     let tokenB;
     let callerTokenBAccount;
     let callerTokenAAccount;
+    let tokenAAccountToFreeze;
     const initialTokenBLiquidity = new BN(500 * 10 ** 8);
     const initialTokenALiquidity = new BN(10000 * 10 ** 8);
     const swapInitAmountTokenA = new BN(2400 * 10 ** 8);
@@ -54,6 +57,7 @@ describe("rly-cli", () => {
 
         callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
         callerTokenAAccount = await tokenA.createAssociatedTokenAccount(payer.publicKey);
+        tokenAAccountToFreeze = await tokenA.createAccount(payer.publicKey)
         await tokenB.mintTo(callerTokenBAccount, payer, [], initialTokenBLiquidity.toNumber());
         await tokenA.mintTo(callerTokenAAccount, payer, [], initialTokenALiquidity.toNumber());
     })
@@ -79,6 +83,16 @@ describe("rly-cli", () => {
         const resString = result.trim().split(' ')[0];
         assert.strictEqual(resString, "mint")
     });
+
+    it("it should freeze a token account", async () => {
+
+        const { payer } = wallet;
+        const result = test("freeze-token-account", `${tokenA.publicKey.toBase58()} ${tokenAAccountToFreeze.toBase58()}`)
+        const acctInfo = await getTokenAccountInfo(connection, tokenAAccountToFreeze);
+        assert.equal(acctInfo.state, 2);
+    });
+
+
     it("it should get canonical token balance", async () => {
         const { payer } = wallet;
         const result = test("get-balance-canonical", `-k ${process.env.KEYPAIR_MAINNET}`)
@@ -104,7 +118,6 @@ describe("rly-cli", () => {
     it("it should get a tbc", async () => {
         const { payer } = wallet;
         const result = test("get-tbc", `${tbcPubKey} -k ${process.env.KEYPAIR_DEVNET}`)
-        tbcPubKey = result.trim().split(/\s+/)[7];
     });
     it("it should estimate swap on tbc", async () => {
         const { payer } = wallet;

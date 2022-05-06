@@ -1,12 +1,16 @@
 
 import assert from 'assert';
+const chai = require('chai')
+const expect = chai.expect
+chai.use(require('chai-as-promised'))
 
 import { web3, Provider, BN } from "@project-serum/anchor"
 import { NodeWallet } from "@metaplex/js";
 
-import { initializeLinearPriceCurve, executeSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo } from "../src";
+import { initializeLinearPriceCurve, executeSwap, tokenSwapProgram, Numberu64, getTokenSwapInfo, getMintInfo, getTokenAccountInfo } from "../src";
 
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { token } from '@project-serum/anchor/dist/cjs/utils';
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
 describe('test freeze', () => {
@@ -40,6 +44,8 @@ describe('test freeze', () => {
         const { payer } = wallet;
         await connection.confirmTransaction(await connection.requestAirdrop(wallet.publicKey, LAMPORTS_PER_SOL))
 
+        // create token A
+
         tokenA = await Token.createMint(
             connection,
             payer,
@@ -49,6 +55,7 @@ describe('test freeze', () => {
             TOKEN_PROGRAM_ID
         );
 
+        // create token B
 
         tokenB = await Token.createMint(
             connection,
@@ -59,10 +66,21 @@ describe('test freeze', () => {
             TOKEN_PROGRAM_ID
         );
 
+        // create token a token account for caller
+
         callerTokenAAccount = await tokenA.createAssociatedTokenAccount(payer.publicKey);
+
+        // creat token b token account for caller
+
         callerTokenBAccount = await tokenB.createAssociatedTokenAccount(payer.publicKey);
-        await tokenB.mintTo(callerTokenBAccount, payer, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer()));
+
+
+        // mint initial supply of token a to caller
         await tokenA.mintTo(callerTokenAAccount, payer, [], initialTokenALiquidity.toNumber());
+
+
+        // mint initial supply of token b to caller
+        await tokenB.mintTo(callerTokenBAccount, payer, [], Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer('le', 8)));
     })
 
     it('it should initiliaze a linear price curve', async () => {
@@ -101,16 +119,20 @@ describe('test freeze', () => {
         tokenBTokenAccount = data.tokenAccountB;
         const { amount: feeAmount } = await poolToken.getAccountInfo(feeAccount);
         const { amount: destinationAmount } = await poolToken.getAccountInfo(destinationAccount.publicKey)
+        const { amount: tokenBTokenAccountAmount } = await tokenB.getAccountInfo(tokenBTokenAccount);
 
+        assert.ok(tokenBTokenAccountAmount.eq(initialTokenBLiquidity))
         assert.ok(feeAmount.eq(new BN(0)));
         assert.ok(destinationAmount.eq(new BN(10 * 10 ** 8)));
 
     })
 
-    it('should freeze the initialized token swap', async () => {
+    it('should freeze the initialized token swap token account', async () => {
 
         const { payer } = wallet
         await tokenA.freezeAccount(tokenATokenAccount, payer.publicKey, []);
+        const acctInfo = await getTokenAccountInfo(connection, tokenATokenAccount);
+        assert.equal(acctInfo.state, 2);
 
     })
 
@@ -119,7 +141,7 @@ describe('test freeze', () => {
         const tokenSwap = await tokenSwapProgram(provider);
         const amountOut = new BN(0)
 
-        const tx = await executeSwap({
+        const fail = executeSwap({
             tokenSwap,
             tokenSwapInfo: tokenSwapInfo.publicKey,
             amountIn: swapInitAmountTokenA,
@@ -134,8 +156,7 @@ describe('test freeze', () => {
             wallet,
             connection
         })
-
-        await connection.confirmTransaction(tx)
+        await expect(fail).to.eventually.be.rejectedWith("failed to send transaction: Transaction simulation failed: Error processing Instruction 0: custom program error: 0x11");
 
     })
 })
