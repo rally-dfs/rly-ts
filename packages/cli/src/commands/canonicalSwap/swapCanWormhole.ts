@@ -5,8 +5,7 @@ import { config } from '../../utils/config';
 
 const { PublicKey } = web3;
 
-import { swapCanonicalForWrapped, canonicalSwapProgram, getOrCreateAssociatedAccount } from '../../../../ts/lib/src';
-
+import { swapCanonicalForWrapped, canonicalSwapProgram, getOrCreateAssociatedAccount } from 'rly-js';
 
 export const swapCanWormholeCommand = async (options) => {
 

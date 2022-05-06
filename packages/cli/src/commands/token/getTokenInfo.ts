@@ -1,7 +1,7 @@
 import { web3 } from '@project-serum/anchor';
 const { Connection, clusterApiUrl, PublicKey } = web3;
 
-import { getMintInfo, getMetadata } from '../../../../ts/lib/src';
+import { getMintInfo, getMetadata } from 'rly-js';
 
 export const getTokenInfoCommand = async (mint, options) => {
     const { env } = options;

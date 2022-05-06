@@ -4,7 +4,7 @@ const { Connection, clusterApiUrl } = web3;
 import { NodeWallet } from '@metaplex/js';
 import { loadKeypair } from "../../utils/utils"
 
-import { createToken } from '../../../../ts/lib/src';
+import { createToken } from 'rly-js';
 
 export const createTokenCommand = async (options) => {
 

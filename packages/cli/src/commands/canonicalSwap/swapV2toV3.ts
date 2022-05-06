@@ -5,7 +5,7 @@ import { config } from '../../utils/config';
 
 const { PublicKey } = web3;
 
-import { swapWrappedForCanonical, canonicalSwapProgram, getOrCreateAssociatedAccount } from '../../../../ts/lib/src';
+import { swapWrappedForCanonical, canonicalSwapProgram, getOrCreateAssociatedAccount } from 'rly-js';
 
 export const swapV2toV3Command = async (options) => {
 

@@ -5,7 +5,7 @@ const { Connection, clusterApiUrl, PublicKey } = web3;
 import { NodeWallet } from '@metaplex/js';
 import { loadKeypair } from "../../utils/utils"
 
-import { addMetadata } from '../../../../ts/lib/src';
+import { addMetadata } from 'rly-js';
 
 export const addMetadataCommand = async (mint, options) => {
 

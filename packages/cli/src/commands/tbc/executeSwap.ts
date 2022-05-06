@@ -3,7 +3,7 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 const { PublicKey, Keypair } = web3;
 import { getProvider } from "../../utils/utils"
 
-import { tokenSwapProgram, getOrCreateAssociatedAccount, getTokenAccountInfo, getTokenSwapInfo, executeSwap } from '../../../../ts/lib/src';
+import { tokenSwapProgram, getOrCreateAssociatedAccount, getTokenAccountInfo, getTokenSwapInfo, executeSwap } from 'rly-js';
 
 export const executeSwapCommand = async (swap, token_a, token_b, amount, options) => {
 

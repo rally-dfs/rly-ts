@@ -3,7 +3,7 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 const { PublicKey, Keypair } = web3;
 import { getProvider } from "../../utils/utils"
 
-import { tokenSwapProgram, getOrCreateAssociatedAccount, initializeLinearPriceCurve, getTokenSwapInfo } from '../../../../ts/lib/src';
+import { tokenSwapProgram, getOrCreateAssociatedAccount, initializeLinearPriceCurve, getTokenSwapInfo } from 'rly-js';
 
 export const initTbcCommand = async (token_a, token_b, token_b_liquidity, options) => {
 

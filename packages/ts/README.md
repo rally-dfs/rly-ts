@@ -40,7 +40,8 @@ const { tx, tokenMint } = await createToken({
             initialSupply,
             tokenData: { name, symbol, decimals },
             connection,
-            wallet
+            wallet,
+            freezeAuthority: true,
         })
 
 // fetch metadata

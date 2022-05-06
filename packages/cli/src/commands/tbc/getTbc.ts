@@ -5,7 +5,7 @@ import { web3, BN } from '@project-serum/anchor';
 const { PublicKey, Keypair } = web3;
 import { getProvider } from "../../utils/utils"
 
-import { tokenSwapProgram, getMintInfo, getTokenAccountInfo, getTokenSwapInfo } from '../../../../ts/lib/src';
+import { tokenSwapProgram, getMintInfo, getTokenAccountInfo, getTokenSwapInfo } from 'rly-js';
 
 
 export const getTbcCommand = async (tbc, options) => {
