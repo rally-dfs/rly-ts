@@ -1,8 +1,5 @@
-
 export type TokenData = {
-    name: string;
-    symbol: string;
-    decimals: number
+  name: string;
+  symbol: string;
+  decimals: number;
 };
-
-

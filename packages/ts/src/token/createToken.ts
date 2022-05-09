@@ -1,85 +1,117 @@
-import { Token, TOKEN_PROGRAM_ID, u64, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { Wallet } from '@metaplex/js';
-import { MetadataDataData, Metadata, CreateMetadata } from '@metaplex-foundation/mpl-token-metadata';
-import { TokenData } from '../types';
+import {
+  Token,
+  TOKEN_PROGRAM_ID,
+  u64,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+import { Wallet } from "@metaplex/js";
+import {
+  MetadataDataData,
+  Metadata,
+  CreateMetadata,
+} from "@metaplex-foundation/mpl-token-metadata";
+import { TokenData } from "../types";
 import { BN, web3, Provider } from "@project-serum/anchor";
-import { generateTokenMintInstructions } from '../utils';
-const { Transaction, } = web3;
-
+import { generateTokenMintInstructions } from "../utils";
+const { Transaction } = web3;
 
 interface createTokenParams {
-    initialSupply: BN;
-    tokenData: TokenData;
-    connection: any;
-    wallet: Wallet;
-    //if true caller wallet will retain freeze authority over the token
-    freezeAuthority: boolean;
+  initialSupply: BN;
+  tokenData: TokenData;
+  connection: any;
+  wallet: Wallet;
+  //if true caller wallet will retain freeze authority over the token
+  freezeAuthority: boolean;
 }
 
+export const createToken = async (
+  {
+    initialSupply,
+    tokenData,
+    connection,
+    wallet,
+    freezeAuthority,
+  } = {} as createTokenParams
+) => {
+  // create token mint
 
-export const createToken = async ({ initialSupply, tokenData, connection, wallet, freezeAuthority } = {} as createTokenParams) => {
+  const provider = new Provider(connection, wallet, {
+    commitment: "confirmed",
+    preflightCommitment: "processed",
+  });
+  const transaction = new Transaction();
 
-    // create token mint 
+  // create mint
 
-    const provider = new Provider(connection, wallet, { commitment: "confirmed", preflightCommitment: "processed" });
-    const transaction = new Transaction();
+  const { tokenIx, tokenMint } = await generateTokenMintInstructions(
+    connection,
+    wallet,
+    wallet.publicKey,
+    freezeAuthority ? wallet.publicKey : null,
+    tokenData.decimals
+  );
 
+  // create associated account to receive tokens
 
-    // create mint
+  const tokenAccount = await Token.getAssociatedTokenAddress(
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+    TOKEN_PROGRAM_ID,
+    tokenMint.publicKey,
+    wallet.publicKey
+  );
+  const associatedAcctIx = await Token.createAssociatedTokenAccountInstruction(
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+    TOKEN_PROGRAM_ID,
+    tokenMint.publicKey,
+    tokenAccount,
+    wallet.publicKey,
+    wallet.publicKey
+  );
 
-    const { tokenIx, tokenMint } = await generateTokenMintInstructions(
-        connection,
-        wallet,
-        wallet.publicKey,
-        freezeAuthority ? wallet.publicKey : null,
-        tokenData.decimals)
+  // send initial supply to token account
 
-    // create associated account to receive tokens
+  const mintToIx = await Token.createMintToInstruction(
+    TOKEN_PROGRAM_ID,
+    tokenMint.publicKey,
+    tokenAccount,
+    wallet.publicKey,
+    [],
+    new u64(initialSupply.toString())
+  );
 
-    const tokenAccount = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, tokenMint.publicKey, wallet.publicKey)
-    const associatedAcctIx = await Token.createAssociatedTokenAccountInstruction(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, tokenMint.publicKey, tokenAccount, wallet.publicKey, wallet.publicKey)
+  // create metadata obj
 
-    // send initial supply to token account
+  const metadataData = new MetadataDataData({
+    name: tokenData.name,
+    symbol: tokenData.symbol,
+    // values below are only used for NFT metadata
+    uri: "",
+    sellerFeeBasisPoints: null,
+    creators: null,
+  });
 
-    const mintToIx = await Token.createMintToInstruction(TOKEN_PROGRAM_ID, tokenMint.publicKey, tokenAccount, wallet.publicKey, [], new u64(initialSupply.toString()))
+  // get metadata PDA
 
-    // create metadata obj
+  const metadata = await Metadata.getPDA(tokenMint.publicKey);
 
-    const metadataData = new MetadataDataData({
-        name: tokenData.name,
-        symbol: tokenData.symbol,
-        // values below are only used for NFT metadata
-        uri: "",
-        sellerFeeBasisPoints: null,
-        creators: null,
-    });
+  // create metadata Tx
 
-    // get metadata PDA
+  const createMetadataTx = new CreateMetadata(
+    { feePayer: wallet.publicKey },
+    {
+      metadata,
+      metadataData,
+      updateAuthority: wallet.publicKey,
+      mint: tokenMint.publicKey,
+      mintAuthority: wallet.publicKey,
+    }
+  );
 
+  // return tx hash, token mint, token account
 
-    const metadata = await Metadata.getPDA(tokenMint.publicKey)
+  transaction.add(...tokenIx, associatedAcctIx, mintToIx, createMetadataTx);
 
-    // create metadata Tx
+  const tx = await provider.send(transaction, [tokenMint]);
 
-    const createMetadataTx = new CreateMetadata(
-        { feePayer: wallet.publicKey },
-        {
-            metadata,
-            metadataData,
-            updateAuthority: wallet.publicKey,
-            mint: tokenMint.publicKey,
-            mintAuthority: wallet.publicKey,
-        },
-    );
-
-    // return tx hash, token mint, token account 
-
-    transaction.add(...tokenIx, associatedAcctIx, mintToIx, createMetadataTx)
-
-    const tx = await provider.send(transaction, [tokenMint])
-
-    return { tx, tokenMint: tokenMint.publicKey, tokenAccount }
-
-
-}
-
+  return { tx, tokenMint: tokenMint.publicKey, tokenAccount };
+};

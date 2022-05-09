@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import { program } from 'commander';
-program.version('0.0.6');
+program.version('0.0.9');
 
 import {
     createTokenCommand,
