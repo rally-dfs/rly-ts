@@ -1,0 +1,26 @@
+name: RLY TS Basic CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Install Lerna
+      run: npm install -g lerna
+
+    - name: Boostrap packages
+      run: lerna bootstrap --no-ci
+
+    - name: Compile Typescript packages
+      run: lerna run tsc
