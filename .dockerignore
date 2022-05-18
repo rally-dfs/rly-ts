@@ -1,0 +1,6 @@
+node_modules
+**/*/node_modules
+
+target
+# No reason to copy over git repo
+.git
