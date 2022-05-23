@@ -24,3 +24,6 @@ jobs:
 
     - name: Compile Typescript packages
       run: lerna run tsc
+
+    - name: Run Test Suite
+      run: lerna run test-all-js-library
