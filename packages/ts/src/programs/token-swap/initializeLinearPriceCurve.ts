@@ -219,7 +219,7 @@ export const initializeLinearPriceCurveTx = async (
       poolTokenMint,
       tokenATokenAccount,
       tokenBTokenAccount,
-      callerTokenBAccountOwner && callerTokenBAccountOwner.payer,
+      ...(callerTokenBAccountOwner ? [callerTokenBAccountOwner.payer] : []),
     ]
   );
 
