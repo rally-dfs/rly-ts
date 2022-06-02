@@ -7,6 +7,7 @@ import {
   generateCreateTokenAccountInstructions,
   Numberu64,
   sendTx,
+  partialSignTx,
 } from "../../utils";
 
 const {
@@ -55,6 +56,8 @@ interface initializeLinearPriceCurveOpts {
   adminAccountOwner?: web3.PublicKey;
 }
 
+//generate partially signed transaction objects for initializing tbc
+
 export const initializeLinearPriceCurveTx = async (
   {
     tokenSwap,
@@ -76,10 +79,13 @@ export const initializeLinearPriceCurveTx = async (
     adminAccountOwner,
   } = {} as initializeLinearPriceCurveOpts
 ) => {
-  // initialize required transactions
+  // initialize required transactions, split into two transactions as combined the transations are > the 1232 bytes limit for solana
 
-  const setupTransaction = new Transaction();
-  const initTbcTransaction = new Transaction();
+  // setupTransaction creates required accounts for tbc
+  let setupTransaction = new Transaction();
+
+  //initTbcTransaciton initializes the new tbc
+  let initTbcTransaction = new Transaction();
 
   // get exepcted swap authority PDA
 
@@ -99,7 +105,7 @@ export const initializeLinearPriceCurveTx = async (
       poolTokenDecimals
     );
 
-  // get token accounts creat instrucstions for swap pda
+  // get token account create instructions for swap pda
 
   const {
     tokenAccount: tokenATokenAccount,
@@ -119,6 +125,8 @@ export const initializeLinearPriceCurveTx = async (
     tokenB,
     expectedSwapAuthorityPDA
   );
+
+  //transfer initial token_b liquidity into the swap token_b token account
 
   const tokenBTransferIx = Token.createTransferInstruction(
     TOKEN_PROGRAM_ID,
@@ -150,6 +158,8 @@ export const initializeLinearPriceCurveTx = async (
     adminAccountOwner ? adminAccountOwner : walletPubKey
   );
 
+  // create the tokenswapinfo data account to store swap data
+
   const tokenSwapInfoIx = web3.SystemProgram.createAccount({
     fromPubkey: walletPubKey,
     newAccountPubkey: tokenSwapInfo.publicKey,
@@ -159,6 +169,8 @@ export const initializeLinearPriceCurveTx = async (
     ),
     programId: tokenSwap.programId,
   });
+
+  //initiliaze the TBC
 
   const initCurveIx = tokenSwap.instruction.initializeLinearPrice(
     slopeNumerator,
@@ -179,6 +191,8 @@ export const initializeLinearPriceCurveTx = async (
     }
   );
 
+  // populate setup transaction
+
   setupTransaction.add(
     ...tokenIx,
     ...createTokenATokenAccountIx,
@@ -186,10 +200,7 @@ export const initializeLinearPriceCurveTx = async (
     tokenBTransferIx
   );
 
-  setupTransaction.feePayer = walletPubKey;
-  setupTransaction.recentBlockhash = (
-    await connection.getRecentBlockhash()
-  ).blockhash;
+  // populate init tbc transaction
 
   initTbcTransaction.add(
     ...createFeeAccountIx,
@@ -198,28 +209,33 @@ export const initializeLinearPriceCurveTx = async (
     initCurveIx
   );
 
-  initTbcTransaction.feePayer = walletPubKey;
-  initTbcTransaction.recentBlockhash = (
-    await connection.getRecentBlockhash()
-  ).blockhash;
+  // partially sign setup transaction with generated accounts
 
-  // partially sign setup instruction
-
-  // @ts-ignore
-  setupTransaction.partialSign(
-    poolTokenMint,
-    tokenATokenAccount,
-    tokenBTokenAccount,
-    callerTokenBAccountOwner && callerTokenBAccountOwner.payer
+  setupTransaction = await partialSignTx(
+    walletPubKey,
+    connection,
+    setupTransaction,
+    [
+      poolTokenMint,
+      tokenATokenAccount,
+      tokenBTokenAccount,
+      callerTokenBAccountOwner && callerTokenBAccountOwner.payer,
+    ]
   );
 
-  //partially sign init tbc transaction
+  //partially sign init tbc transaction with generated accounts
 
-  // @ts-ignore
-  initTbcTransaction.partialSign(tokenSwapInfo, feeAccount, destinationAccount);
+  initTbcTransaction = await partialSignTx(
+    walletPubKey,
+    connection,
+    initTbcTransaction,
+    [tokenSwapInfo, feeAccount, destinationAccount]
+  );
 
   return { setupTransaction, initTbcTransaction };
 };
+
+//generate partially signed transaction objects for initializing tbc
 
 export const initializeLinearPriceCurve = async (
   {
@@ -262,10 +278,15 @@ export const initializeLinearPriceCurve = async (
       { callerTokenBAccountOwner, adminAccountOwner }
     );
 
-  const setupTx = await sendTx(wallet, connection, setupTransaction);
-  await connection.confirmTransaction(setupTx);
-  const tx = await sendTx(wallet, connection, initTbcTransaction);
-  await connection.confirmTransaction(tx);
+  //send setup tx await tx finality
+  const setupTx = await sendTx(wallet, connection, setupTransaction, {
+    commitment: "finalized",
+  });
+
+  //send init tbc tx await tx finality
+  const tx = await sendTx(wallet, connection, initTbcTransaction, {
+    commitment: "finalized",
+  });
 
   return { tx, setupTx };
 };

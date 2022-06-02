@@ -147,7 +147,6 @@ describe("token swap", () => {
         connection,
         initialTokenBLiquidity,
       },
-
       {
         callerTokenBAccountOwner: new NodeWallet(tokenBAdmin),
         adminAccountOwner: adminOwner.publicKey,
