@@ -335,19 +335,23 @@ export const simulateTransaction = async (
   return res.result;
 };
 
-//partially sign tx with array of Keypairs
-export const partialSignTx = async (
-  walletPubKey: web3.PublicKey,
-  connection: Connection,
+export const addTxPayerAndHash = async (
   transaction: web3.Transaction,
-  signers: web3.Keypair[]
+  connection: web3.Connection,
+  payer: web3.PublicKey
 ) => {
   // add fee payer and recent block hash to tx
-  transaction.feePayer = walletPubKey;
+  transaction.feePayer = payer;
   transaction.recentBlockhash = (
     await connection.getRecentBlockhash()
   ).blockhash;
+};
 
+//partially sign tx with array of Keypairs
+export const partialSignTx = async (
+  transaction: web3.Transaction,
+  signers: web3.Keypair[]
+) => {
   // partially sign setup transaction with generated accounts
 
   transaction.partialSign(...signers);
@@ -362,6 +366,7 @@ export const sendTx = async (
   txOpts: web3.ConfirmOptions
 ) => {
   await wallet.signTransaction(transaction);
+
   const rawTx = transaction.serialize();
   return await sendAndConfirmRawTransaction(connection, rawTx, txOpts);
 };

@@ -1,7 +1,7 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Program, web3, BN, Provider } from "@project-serum/anchor";
 import { Wallet, NodeWallet } from "@metaplex/js";
-import { partialSignTx, sendTx } from "../../utils";
+import { partialSignTx, sendTx, addTxPayerAndHash } from "../../utils";
 const {
   PublicKey,
   SystemProgram: { programId },
@@ -88,11 +88,11 @@ export const executeSwapTx = async (
   });
 
   transaction.add(ix);
-  userTransferAuthorityOwner &&
-    (await partialSignTx(walletPubKey, connection, transaction, [
-      userTransferAuthorityOwner.payer,
-    ]));
 
+  await addTxPayerAndHash(transaction, connection, walletPubKey);
+
+  userTransferAuthorityOwner &&
+    (await partialSignTx(transaction, [userTransferAuthorityOwner.payer]));
   return transaction;
 };
 

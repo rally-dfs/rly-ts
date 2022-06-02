@@ -8,6 +8,7 @@ import {
   Numberu64,
   sendTx,
   partialSignTx,
+  addTxPayerAndHash,
 } from "../../utils";
 
 const {
@@ -209,28 +210,30 @@ export const initializeLinearPriceCurveTx = async (
     initCurveIx
   );
 
+  //add tx payer and recent blockchash to setup transaction
+
+  await addTxPayerAndHash(setupTransaction, connection, walletPubKey);
+
   // partially sign setup transaction with generated accounts
 
-  setupTransaction = await partialSignTx(
-    walletPubKey,
-    connection,
-    setupTransaction,
-    [
-      poolTokenMint,
-      tokenATokenAccount,
-      tokenBTokenAccount,
-      ...(callerTokenBAccountOwner ? [callerTokenBAccountOwner.payer] : []),
-    ]
-  );
+  setupTransaction = await partialSignTx(setupTransaction, [
+    poolTokenMint,
+    tokenATokenAccount,
+    tokenBTokenAccount,
+    ...(callerTokenBAccountOwner ? [callerTokenBAccountOwner.payer] : []),
+  ]);
+
+  //add tx payer and recent blockchash to init tbc transaction
+
+  await addTxPayerAndHash(initTbcTransaction, connection, walletPubKey);
 
   //partially sign init tbc transaction with generated accounts
 
-  initTbcTransaction = await partialSignTx(
-    walletPubKey,
-    connection,
-    initTbcTransaction,
-    [tokenSwapInfo, feeAccount, destinationAccount]
-  );
+  initTbcTransaction = await partialSignTx(initTbcTransaction, [
+    tokenSwapInfo,
+    feeAccount,
+    destinationAccount,
+  ]);
 
   return { setupTransaction, initTbcTransaction };
 };
