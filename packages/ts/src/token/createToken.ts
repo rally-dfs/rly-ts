@@ -45,7 +45,7 @@ export const createToken = async (
 
   const { tokenIx, tokenMint } = await generateTokenMintInstructions(
     connection,
-    wallet,
+    wallet.publicKey,
     wallet.publicKey,
     freezeAuthority ? wallet.publicKey : null,
     tokenData.decimals
