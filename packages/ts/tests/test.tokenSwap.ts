@@ -199,7 +199,7 @@ describe("token swap", () => {
       swapDestinationTokenAccount: tokenBTokenAccount,
       poolMintAccount: poolToken.publicKey,
       poolFeeAccount: feeAccount,
-      wallet,
+      walletPubKey: wallet.publicKey,
       connection,
     });
 
@@ -262,7 +262,7 @@ describe("token swap", () => {
       swapDestinationTokenAccount: tokenATokenAccount,
       poolMintAccount: poolToken.publicKey,
       poolFeeAccount: feeAccount,
-      wallet,
+      walletPubKey: wallet.publicKey,
       connection,
     });
 

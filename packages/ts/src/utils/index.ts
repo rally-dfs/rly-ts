@@ -287,12 +287,12 @@ export const generateCreateTokenAccountInstructions = async (
 
 export const simulateTransaction = async (
   tx: any,
-  wallet: Wallet,
+  walletPubKey: web3.PublicKey,
   connection: web3.Connection,
   opts: any,
   includeAccounts: web3.PublicKey[]
 ) => {
-  tx.feePayer = wallet.publicKey;
+  tx.feePayer = walletPubKey;
   tx.recentBlockhash = (
     await connection.getRecentBlockhash(opts.preflightCommitment)
   ).blockhash;

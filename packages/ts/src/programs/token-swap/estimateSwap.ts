@@ -17,7 +17,7 @@ interface estimateSwapParams {
   swapDestinationTokenAccount: web3.PublicKey;
   poolMintAccount: web3.PublicKey;
   poolFeeAccount: web3.PublicKey;
-  wallet: Wallet;
+  walletPubKey: web3.PublicKey;
   connection: web3.Connection;
 }
 
@@ -34,7 +34,7 @@ export const estimateSwap = async (
     swapDestinationTokenAccount,
     poolMintAccount,
     poolFeeAccount,
-    wallet,
+    walletPubKey,
     connection,
   } = {} as estimateSwapParams
 ) => {
@@ -69,7 +69,7 @@ export const estimateSwap = async (
     value: { err, logs, accounts },
   } = await simulateTransaction(
     tx,
-    wallet,
+    walletPubKey,
     connection,
     { commitment: "confirmed", preflightCommitment: "processed" },
     [userSourceTokenAccount, userDestinationTokenAccount]
