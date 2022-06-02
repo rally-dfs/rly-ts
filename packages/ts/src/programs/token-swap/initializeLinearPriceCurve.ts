@@ -1,22 +1,35 @@
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Program, web3, BN, Provider } from "@project-serum/anchor";
+import { Program, web3, BN } from "@project-serum/anchor";
 import { config } from "../../../config";
 import { Wallet, NodeWallet } from "@metaplex/js";
 import {
   generateTokenMintInstructions,
   generateCreateTokenAccountInstructions,
   Numberu64,
+  sendTx,
 } from "../../utils";
 
 const {
   accountLayout: { SWAP_ACCOUNT_SPACE },
 } = config;
 
-const {
-  PublicKey,
-  SystemProgram: { programId },
-  Transaction,
-} = web3;
+const { PublicKey, Transaction } = web3;
+
+interface initializeLinearPriceCurveTxParams {
+  tokenSwap: Program;
+  slopeNumerator: BN;
+  slopeDenominator: BN;
+  initialTokenAPriceNumerator: BN;
+  initialTokenAPriceDenominator: BN;
+  callerTokenBAccount: web3.PublicKey;
+  tokenSwapInfo: web3.Keypair;
+  tokenA: web3.PublicKey;
+  tokenB: web3.PublicKey;
+  poolTokenDecimals: number;
+  walletPubKey: web3.PublicKey;
+  connection: any;
+  initialTokenBLiquidity: BN;
+}
 
 interface initializeLinearPriceCurveParams {
   tokenSwap: Program;
@@ -36,13 +49,13 @@ interface initializeLinearPriceCurveParams {
 
 interface initializeLinearPriceCurveOpts {
   //if the owner of the caller tokenB account is not the caller wallet account include the tokenB owner wallet here
-  //do not use if calling from web
+  //do not use if calling from web or mobile
   callerTokenBAccountOwner?: NodeWallet;
   //if the owner of the fee token account and destination token account is not the caller wallet include the admin owner public key here
   adminAccountOwner?: web3.PublicKey;
 }
 
-export const initializeLinearPriceCurve = async (
+export const initializeLinearPriceCurveTx = async (
   {
     tokenSwap,
     slopeNumerator,
@@ -54,19 +67,17 @@ export const initializeLinearPriceCurve = async (
     tokenA,
     tokenB,
     poolTokenDecimals,
-    wallet,
+    walletPubKey,
     connection,
     initialTokenBLiquidity,
-  } = {} as initializeLinearPriceCurveParams,
+  } = {} as initializeLinearPriceCurveTxParams,
   {
     callerTokenBAccountOwner,
     adminAccountOwner,
   } = {} as initializeLinearPriceCurveOpts
 ) => {
-  const provider = new Provider(connection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "processed",
-  });
+  // initialize required transactions
+
   const setupTransaction = new Transaction();
   const initTbcTransaction = new Transaction();
 
@@ -82,7 +93,7 @@ export const initializeLinearPriceCurve = async (
   const { tokenIx, tokenMint: poolTokenMint } =
     await generateTokenMintInstructions(
       connection,
-      wallet,
+      walletPubKey,
       expectedSwapAuthorityPDA,
       null,
       poolTokenDecimals
@@ -95,7 +106,7 @@ export const initializeLinearPriceCurve = async (
     accountIx: createTokenATokenAccountIx,
   } = await generateCreateTokenAccountInstructions(
     connection,
-    wallet,
+    walletPubKey,
     tokenA,
     expectedSwapAuthorityPDA
   );
@@ -104,7 +115,7 @@ export const initializeLinearPriceCurve = async (
     accountIx: createTokenBTokenAccountIx,
   } = await generateCreateTokenAccountInstructions(
     connection,
-    wallet,
+    walletPubKey,
     tokenB,
     expectedSwapAuthorityPDA
   );
@@ -115,7 +126,7 @@ export const initializeLinearPriceCurve = async (
     tokenBTokenAccount.publicKey,
     callerTokenBAccountOwner
       ? callerTokenBAccountOwner.publicKey
-      : wallet.publicKey,
+      : walletPubKey,
     [],
     Numberu64.fromBuffer(initialTokenBLiquidity.toArrayLike(Buffer, "le", 8))
   );
@@ -125,25 +136,25 @@ export const initializeLinearPriceCurve = async (
   const { tokenAccount: feeAccount, accountIx: createFeeAccountIx } =
     await generateCreateTokenAccountInstructions(
       connection,
-      wallet,
+      walletPubKey,
       poolTokenMint.publicKey,
-      adminAccountOwner ? adminAccountOwner : wallet.publicKey
+      adminAccountOwner ? adminAccountOwner : walletPubKey
     );
   const {
     tokenAccount: destinationAccount,
     accountIx: createDestinationAccountIx,
   } = await generateCreateTokenAccountInstructions(
     connection,
-    wallet,
+    walletPubKey,
     poolTokenMint.publicKey,
-    adminAccountOwner ? adminAccountOwner : wallet.publicKey
+    adminAccountOwner ? adminAccountOwner : walletPubKey
   );
 
   const tokenSwapInfoIx = web3.SystemProgram.createAccount({
-    fromPubkey: wallet.publicKey,
+    fromPubkey: walletPubKey,
     newAccountPubkey: tokenSwapInfo.publicKey,
     space: SWAP_ACCOUNT_SPACE,
-    lamports: await provider.connection.getMinimumBalanceForRentExemption(
+    lamports: await connection.getMinimumBalanceForRentExemption(
       SWAP_ACCOUNT_SPACE
     ),
     programId: tokenSwap.programId,
@@ -175,6 +186,11 @@ export const initializeLinearPriceCurve = async (
     tokenBTransferIx
   );
 
+  setupTransaction.feePayer = walletPubKey;
+  setupTransaction.recentBlockhash = (
+    await connection.getRecentBlockhash()
+  ).blockhash;
+
   initTbcTransaction.add(
     ...createFeeAccountIx,
     ...createDestinationAccountIx,
@@ -182,17 +198,74 @@ export const initializeLinearPriceCurve = async (
     initCurveIx
   );
 
-  const setupTx = await provider.send(setupTransaction, [
+  initTbcTransaction.feePayer = walletPubKey;
+  initTbcTransaction.recentBlockhash = (
+    await connection.getRecentBlockhash()
+  ).blockhash;
+
+  // partially sign setup instruction
+
+  // @ts-ignore
+  setupTransaction.partialSign(
     poolTokenMint,
     tokenATokenAccount,
     tokenBTokenAccount,
-    callerTokenBAccountOwner && callerTokenBAccountOwner.payer,
-  ]);
-  await connection.confirmTransaction(setupTx);
-  const tx = await provider.send(initTbcTransaction, [
+    callerTokenBAccountOwner && callerTokenBAccountOwner.payer
+  );
+
+  //partially sign init tbc transaction
+
+  // @ts-ignore
+  initTbcTransaction.partialSign(tokenSwapInfo, feeAccount, destinationAccount);
+
+  return { setupTransaction, initTbcTransaction };
+};
+
+export const initializeLinearPriceCurve = async (
+  {
+    tokenSwap,
+    slopeNumerator,
+    slopeDenominator,
+    initialTokenAPriceNumerator,
+    initialTokenAPriceDenominator,
+    callerTokenBAccount,
     tokenSwapInfo,
-    feeAccount,
-    destinationAccount,
-  ]);
-  return { tx, setupTx, destinationAccount };
+    tokenA,
+    tokenB,
+    poolTokenDecimals,
+    wallet,
+    connection,
+    initialTokenBLiquidity,
+  } = {} as initializeLinearPriceCurveParams,
+  {
+    callerTokenBAccountOwner,
+    adminAccountOwner,
+  } = {} as initializeLinearPriceCurveOpts
+) => {
+  const { setupTransaction, initTbcTransaction } =
+    await initializeLinearPriceCurveTx(
+      {
+        tokenSwap,
+        slopeNumerator,
+        slopeDenominator,
+        initialTokenAPriceNumerator,
+        initialTokenAPriceDenominator,
+        callerTokenBAccount,
+        tokenSwapInfo,
+        tokenA,
+        tokenB,
+        poolTokenDecimals,
+        walletPubKey: wallet.publicKey,
+        connection,
+        initialTokenBLiquidity,
+      },
+      { callerTokenBAccountOwner, adminAccountOwner }
+    );
+
+  const setupTx = await sendTx(wallet, connection, setupTransaction);
+  await connection.confirmTransaction(setupTx);
+  const tx = await sendTx(wallet, connection, initTbcTransaction);
+  await connection.confirmTransaction(tx);
+
+  return { tx, setupTx };
 };
