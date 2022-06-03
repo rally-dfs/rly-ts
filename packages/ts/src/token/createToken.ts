@@ -12,42 +12,53 @@ import {
 } from "@metaplex-foundation/mpl-token-metadata";
 import { TokenData } from "../types";
 import { BN, web3, Provider } from "@project-serum/anchor";
-import { generateTokenMintInstructions } from "../utils";
+import { generateTokenMintInstructions, sendTx } from "../utils";
+import { partialSignTx, addTxPayerAndHash } from "../utils";
+import { sendToken } from "@metaplex/js/lib/actions";
 const { Transaction } = web3;
+
+interface createTokenTxResults {
+  transaction: web3.Transaction;
+  tokenMint: web3.PublicKey;
+  tokenAccount: web3.PublicKey;
+}
+
+interface createTokenTxParams {
+  initialSupply: BN;
+  tokenData: TokenData;
+  connection: web3.Connection;
+  walletPubKey: web3.PublicKey;
+  //if true caller wallet will retain freeze authority over the token
+  freezeAuthority: boolean;
+}
 
 interface createTokenParams {
   initialSupply: BN;
   tokenData: TokenData;
-  connection: any;
+  connection: web3.Connection;
   wallet: Wallet;
   //if true caller wallet will retain freeze authority over the token
   freezeAuthority: boolean;
 }
 
-export const createToken = async (
+export const createTokenTx = async (
   {
     initialSupply,
     tokenData,
     connection,
-    wallet,
+    walletPubKey,
     freezeAuthority,
-  } = {} as createTokenParams
-) => {
-  // create token mint
-
-  const provider = new Provider(connection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "processed",
-  });
+  } = {} as createTokenTxParams
+): Promise<createTokenTxResults> => {
   const transaction = new Transaction();
 
   // create mint
 
   const { tokenIx, tokenMint } = await generateTokenMintInstructions(
     connection,
-    wallet,
-    wallet.publicKey,
-    freezeAuthority ? wallet.publicKey : null,
+    walletPubKey,
+    walletPubKey,
+    freezeAuthority ? walletPubKey : null,
     tokenData.decimals
   );
 
@@ -57,15 +68,15 @@ export const createToken = async (
     ASSOCIATED_TOKEN_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     tokenMint.publicKey,
-    wallet.publicKey
+    walletPubKey
   );
   const associatedAcctIx = await Token.createAssociatedTokenAccountInstruction(
     ASSOCIATED_TOKEN_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     tokenMint.publicKey,
     tokenAccount,
-    wallet.publicKey,
-    wallet.publicKey
+    walletPubKey,
+    walletPubKey
   );
 
   // send initial supply to token account
@@ -74,7 +85,7 @@ export const createToken = async (
     TOKEN_PROGRAM_ID,
     tokenMint.publicKey,
     tokenAccount,
-    wallet.publicKey,
+    walletPubKey,
     [],
     new u64(initialSupply.toString())
   );
@@ -97,21 +108,44 @@ export const createToken = async (
   // create metadata Tx
 
   const createMetadataTx = new CreateMetadata(
-    { feePayer: wallet.publicKey },
+    { feePayer: walletPubKey },
     {
       metadata,
       metadataData,
-      updateAuthority: wallet.publicKey,
+      updateAuthority: walletPubKey,
       mint: tokenMint.publicKey,
-      mintAuthority: wallet.publicKey,
+      mintAuthority: walletPubKey,
     }
   );
 
   // return tx hash, token mint, token account
 
   transaction.add(...tokenIx, associatedAcctIx, mintToIx, createMetadataTx);
+  await addTxPayerAndHash(transaction, connection, walletPubKey);
+  await partialSignTx(transaction, [tokenMint]);
+  return { transaction, tokenMint: tokenMint.publicKey, tokenAccount };
+};
 
-  const tx = await provider.send(transaction, [tokenMint]);
+export const createToken = async (
+  {
+    initialSupply,
+    tokenData,
+    connection,
+    wallet,
+    freezeAuthority,
+  } = {} as createTokenParams
+) => {
+  const { transaction, tokenMint, tokenAccount } = await createTokenTx({
+    initialSupply,
+    tokenData,
+    connection,
+    walletPubKey: wallet.publicKey,
+    freezeAuthority,
+  });
 
-  return { tx, tokenMint: tokenMint.publicKey, tokenAccount };
+  const tx = await sendTx(wallet, connection, transaction, {
+    commitment: "finalized",
+  });
+
+  return { tx, tokenMint: tokenMint, tokenAccount };
 };

@@ -1,309 +1,373 @@
-import { config } from "../../config"
-import { web3, BN, Provider } from '@project-serum/anchor';
+import { config } from "../../config";
+import { web3, BN, Provider } from "@project-serum/anchor";
 import * as BufferLayout from "@solana/buffer-layout";
-import { u64, AccountLayout, TOKEN_PROGRAM_ID, MintLayout, Token } from "@solana/spl-token";
+import {
+  u64,
+  AccountLayout,
+  TOKEN_PROGRAM_ID,
+  MintLayout,
+  Token,
+} from "@solana/spl-token";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-const { PublicKey, SystemProgram, Keypair } = web3;
+import { Connection } from "@metaplex/js";
+const { PublicKey, SystemProgram, Keypair, sendAndConfirmRawTransaction } =
+  web3;
 
+const {
+  accountLayout: { SWAP_ACCOUNT_SPACE },
+} = config;
 
-const { accountLayout: { SWAP_ACCOUNT_SPACE } } = config;
+export const sRLY_PUBKEY = new PublicKey(
+  "RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq"
+);
 
-export const sRLY_PUBKEY = new PublicKey('RLYv2ubRMDLcGG2UyvPmnPmkfuQTsMbg4Jtygc7dmnq');
-
-
-export const getOrCreateAssociatedAccount = async (token: Token, pubKey: web3.PublicKey) => {
-
-    const accountInfo = await token.getOrCreateAssociatedAccountInfo(pubKey);
-    return accountInfo.address;
-
-}
-
-
-export const createSwapInfoAccount = async (provider: Provider, fromPubkey: web3.PublicKey, programId: web3.PublicKey) => {
-    // Generate new keypair
-
-    const newAccount = web3.Keypair.generate();
-
-
-    // Create account transaction.
-    const tx = new web3.Transaction();
-    tx.add(
-        web3.SystemProgram.createAccount({
-            fromPubkey: fromPubkey,
-            newAccountPubkey: newAccount.publicKey,
-            space: SWAP_ACCOUNT_SPACE,
-            lamports: await provider.connection.getMinimumBalanceForRentExemption(SWAP_ACCOUNT_SPACE),
-            programId
-        })
-    );
-    await provider.send(tx, [newAccount]);
-
-    return newAccount;
-}
-
-
-const publicKeyLayout = (property: string = 'publicKey'): any => {
-    return BufferLayout.blob(32, property);
+export const getOrCreateAssociatedAccount = async (
+  token: Token,
+  pubKey: web3.PublicKey
+) => {
+  const accountInfo = await token.getOrCreateAssociatedAccountInfo(pubKey);
+  return accountInfo.address;
 };
 
-const uint64Layout = (property: string = 'uint64'): any => {
-    return BufferLayout.blob(8, property);
+export const createSwapInfoAccount = async (
+  provider: Provider,
+  fromPubkey: web3.PublicKey,
+  programId: web3.PublicKey
+) => {
+  // Generate new keypair
+
+  const newAccount = web3.Keypair.generate();
+
+  // Create account transaction.
+  const tx = new web3.Transaction();
+  tx.add(
+    web3.SystemProgram.createAccount({
+      fromPubkey: fromPubkey,
+      newAccountPubkey: newAccount.publicKey,
+      space: SWAP_ACCOUNT_SPACE,
+      lamports: await provider.connection.getMinimumBalanceForRentExemption(
+        SWAP_ACCOUNT_SPACE
+      ),
+      programId,
+    })
+  );
+  await provider.send(tx, [newAccount]);
+
+  return newAccount;
 };
 
-const loadAccount = async (connection: web3.Connection, address: web3.PublicKey, programId: web3.PublicKey) => {
-    const accountInfo = await connection.getAccountInfo(address);
-    if (accountInfo === null) {
-        throw new Error('Failed to find account');
-    }
+const publicKeyLayout = (property: string = "publicKey"): any => {
+  return BufferLayout.blob(32, property);
+};
 
-    if (!accountInfo.owner.equals(programId)) {
-        throw new Error(`Invalid owner: ${JSON.stringify(accountInfo.owner)}`);
-    }
-    return Buffer.from(accountInfo.data);
-}
+const uint64Layout = (property: string = "uint64"): any => {
+  return BufferLayout.blob(8, property);
+};
+
+const loadAccount = async (
+  connection: web3.Connection,
+  address: web3.PublicKey,
+  programId: web3.PublicKey
+) => {
+  const accountInfo = await connection.getAccountInfo(address);
+  if (accountInfo === null) {
+    throw new Error("Failed to find account");
+  }
+
+  if (!accountInfo.owner.equals(programId)) {
+    throw new Error(`Invalid owner: ${JSON.stringify(accountInfo.owner)}`);
+  }
+  return Buffer.from(accountInfo.data);
+};
 
 const TokenSwapLayout = BufferLayout.struct([
-    BufferLayout.u8('version'),
-    BufferLayout.u8('isInitialized'),
-    BufferLayout.u8('bumpSeed'),
-    publicKeyLayout('tokenProgramId'),
-    publicKeyLayout('tokenAccountA'),
-    publicKeyLayout('tokenAccountB'),
-    publicKeyLayout('tokenPool'),
-    publicKeyLayout('mintA'),
-    publicKeyLayout('mintB'),
-    publicKeyLayout('feeAccount'),
-    uint64Layout('tradeFeeNumerator'),
-    uint64Layout('tradeFeeDenominator'),
-    uint64Layout('ownerTradeFeeNumerator'),
-    uint64Layout('ownerTradeFeeDenominator'),
-    uint64Layout('ownerWithdrawFeeNumerator'),
-    uint64Layout('ownerWithdrawFeeDenominator'),
-    uint64Layout('hostFeeNumerator'),
-    uint64Layout('hostFeeDenominator'),
-    BufferLayout.u8('curveType'),
-    BufferLayout.blob(32, 'curveParameters'),
+  BufferLayout.u8("version"),
+  BufferLayout.u8("isInitialized"),
+  BufferLayout.u8("bumpSeed"),
+  publicKeyLayout("tokenProgramId"),
+  publicKeyLayout("tokenAccountA"),
+  publicKeyLayout("tokenAccountB"),
+  publicKeyLayout("tokenPool"),
+  publicKeyLayout("mintA"),
+  publicKeyLayout("mintB"),
+  publicKeyLayout("feeAccount"),
+  uint64Layout("tradeFeeNumerator"),
+  uint64Layout("tradeFeeDenominator"),
+  uint64Layout("ownerTradeFeeNumerator"),
+  uint64Layout("ownerTradeFeeDenominator"),
+  uint64Layout("ownerWithdrawFeeNumerator"),
+  uint64Layout("ownerWithdrawFeeDenominator"),
+  uint64Layout("hostFeeNumerator"),
+  uint64Layout("hostFeeDenominator"),
+  BufferLayout.u8("curveType"),
+  BufferLayout.blob(32, "curveParameters"),
 ]);
 
 export class Numberu64 extends BN {
-
-    toBuffer(): Buffer {
-        const a = super.toArray().reverse();
-        const b = Buffer.from(a);
-        if (b.length === 8) {
-            return b;
-        }
-
-        const zeroPad = Buffer.alloc(8);
-        b.copy(zeroPad);
-        return zeroPad;
+  toBuffer(): Buffer {
+    const a = super.toArray().reverse();
+    const b = Buffer.from(a);
+    if (b.length === 8) {
+      return b;
     }
 
-    static fromBuffer(buffer: Buffer): Numberu64 {
-        return new Numberu64(
-            [...buffer]
-                .reverse()
-                .map(i => `00${i.toString(16)}`.slice(-2))
-                .join(''),
-            16,
-        );
-    }
+    const zeroPad = Buffer.alloc(8);
+    b.copy(zeroPad);
+    return zeroPad;
+  }
+
+  static fromBuffer(buffer: Buffer): Numberu64 {
+    return new Numberu64(
+      [...buffer]
+        .reverse()
+        .map((i) => `00${i.toString(16)}`.slice(-2))
+        .join(""),
+      16
+    );
+  }
 }
 
 export const accountInfoFromSim = async (account: any) => {
+  let data = account.data;
+  data = Buffer.from(data[0], data[1]);
+  const accountInfo = AccountLayout.decode(data);
+  accountInfo.mint = new PublicKey(accountInfo.mint);
+  accountInfo.owner = new PublicKey(accountInfo.owner);
+  accountInfo.amount = u64.fromBuffer(accountInfo.amount);
+  return accountInfo;
+};
 
-    let data = account.data;
-    data = Buffer.from(data[0], data[1]);
-    const accountInfo = AccountLayout.decode(data);
-    accountInfo.mint = new PublicKey(accountInfo.mint);
-    accountInfo.owner = new PublicKey(accountInfo.owner);
-    accountInfo.amount = u64.fromBuffer(accountInfo.amount);
-    return accountInfo;
+export const getTokenAccountInfo = async (
+  connection: web3.Connection,
+  address: web3.PublicKey
+) => {
+  const { data } = await connection.getAccountInfo(address);
+  const accountInfo = AccountLayout.decode(data);
+  accountInfo.mint = new PublicKey(accountInfo.mint);
+  accountInfo.owner = new PublicKey(accountInfo.owner);
+  accountInfo.amount = u64.fromBuffer(accountInfo.amount);
+  return accountInfo;
+};
 
-}
+export const getTokenSwapInfo = async (
+  connection: web3.Connection,
+  swapInfoPubKey: web3.PublicKey,
+  programId: web3.PublicKey
+) => {
+  const data = await loadAccount(connection, swapInfoPubKey, programId);
+  const tokenSwapData = TokenSwapLayout.decode(data);
+  if (!tokenSwapData.isInitialized) {
+    throw new Error(`Invalid token swap state`);
+  }
 
-export const getTokenAccountInfo = async (connection: web3.Connection, address: web3.PublicKey) => {
+  if (!tokenSwapData.isInitialized) {
+    throw new Error(`Invalid token swap state`);
+  }
 
-    const { data } = await connection.getAccountInfo(address);
-    const accountInfo = AccountLayout.decode(data);
-    accountInfo.mint = new PublicKey(accountInfo.mint);
-    accountInfo.owner = new PublicKey(accountInfo.owner);
-    accountInfo.amount = u64.fromBuffer(accountInfo.amount);
-    return accountInfo;
+  const [authority] = await PublicKey.findProgramAddress(
+    [swapInfoPubKey.toBuffer()],
+    programId
+  );
 
-}
+  const poolToken = new PublicKey(tokenSwapData.tokenPool);
+  const feeAccount = new PublicKey(tokenSwapData.feeAccount);
+  const tokenAccountA = new PublicKey(tokenSwapData.tokenAccountA);
+  const tokenAccountB = new PublicKey(tokenSwapData.tokenAccountB);
+  const mintA = new PublicKey(tokenSwapData.mintA);
+  const mintB = new PublicKey(tokenSwapData.mintB);
+  const tokenProgramId = new PublicKey(tokenSwapData.tokenProgramId);
 
-export const getTokenSwapInfo = async (connection: web3.Connection, swapInfoPubKey: web3.PublicKey, programId: web3.PublicKey) => {
+  const tradeFeeNumerator = Numberu64.fromBuffer(
+    tokenSwapData.tradeFeeNumerator
+  );
+  const tradeFeeDenominator = Numberu64.fromBuffer(
+    tokenSwapData.tradeFeeDenominator
+  );
+  const ownerTradeFeeNumerator = Numberu64.fromBuffer(
+    tokenSwapData.ownerTradeFeeNumerator
+  );
+  const ownerTradeFeeDenominator = Numberu64.fromBuffer(
+    tokenSwapData.ownerTradeFeeDenominator
+  );
+  const ownerWithdrawFeeNumerator = Numberu64.fromBuffer(
+    tokenSwapData.ownerWithdrawFeeNumerator
+  );
+  const ownerWithdrawFeeDenominator = Numberu64.fromBuffer(
+    tokenSwapData.ownerWithdrawFeeDenominator
+  );
+  const hostFeeNumerator = Numberu64.fromBuffer(tokenSwapData.hostFeeNumerator);
+  const hostFeeDenominator = Numberu64.fromBuffer(
+    tokenSwapData.hostFeeDenominator
+  );
+  const curveType = tokenSwapData.curveType;
 
-    const data = await loadAccount(connection, swapInfoPubKey, programId);
-    const tokenSwapData = TokenSwapLayout.decode(data);
-    if (!tokenSwapData.isInitialized) {
-        throw new Error(`Invalid token swap state`);
-    }
+  return {
+    programId,
+    tokenProgramId,
+    poolToken,
+    feeAccount,
+    authority,
+    tokenAccountA,
+    tokenAccountB,
+    mintA,
+    mintB,
+    tradeFeeNumerator,
+    tradeFeeDenominator,
+    ownerTradeFeeNumerator,
+    ownerTradeFeeDenominator,
+    ownerWithdrawFeeNumerator,
+    ownerWithdrawFeeDenominator,
+    hostFeeNumerator,
+    hostFeeDenominator,
+    curveType,
+  };
+};
 
-    if (!tokenSwapData.isInitialized) {
-        throw new Error(`Invalid token swap state`);
-    }
+export const generateTokenMintInstructions = async (
+  connection: web3.Connection,
+  walletPubKey: web3.PublicKey,
+  authority: web3.PublicKey,
+  freezeAuthority: web3.PublicKey | null,
+  decimals: number
+) => {
+  const tokenMint = Keypair.generate();
+  const balanceNeeded = await Token.getMinBalanceRentForExemptMint(connection);
 
-    const [authority] = await PublicKey.findProgramAddress(
-        [swapInfoPubKey.toBuffer()],
-        programId,
-    );
-
-    const poolToken = new PublicKey(tokenSwapData.tokenPool);
-    const feeAccount = new PublicKey(tokenSwapData.feeAccount);
-    const tokenAccountA = new PublicKey(tokenSwapData.tokenAccountA);
-    const tokenAccountB = new PublicKey(tokenSwapData.tokenAccountB);
-    const mintA = new PublicKey(tokenSwapData.mintA);
-    const mintB = new PublicKey(tokenSwapData.mintB);
-    const tokenProgramId = new PublicKey(tokenSwapData.tokenProgramId);
-
-    const tradeFeeNumerator = Numberu64.fromBuffer(
-        tokenSwapData.tradeFeeNumerator,
-    );
-    const tradeFeeDenominator = Numberu64.fromBuffer(
-        tokenSwapData.tradeFeeDenominator,
-    );
-    const ownerTradeFeeNumerator = Numberu64.fromBuffer(
-        tokenSwapData.ownerTradeFeeNumerator,
-    );
-    const ownerTradeFeeDenominator = Numberu64.fromBuffer(
-        tokenSwapData.ownerTradeFeeDenominator,
-    );
-    const ownerWithdrawFeeNumerator = Numberu64.fromBuffer(
-        tokenSwapData.ownerWithdrawFeeNumerator,
-    );
-    const ownerWithdrawFeeDenominator = Numberu64.fromBuffer(
-        tokenSwapData.ownerWithdrawFeeDenominator,
-    );
-    const hostFeeNumerator = Numberu64.fromBuffer(
-        tokenSwapData.hostFeeNumerator,
-    );
-    const hostFeeDenominator = Numberu64.fromBuffer(
-        tokenSwapData.hostFeeDenominator,
-    );
-    const curveType = tokenSwapData.curveType;
-
-    return {
-        programId,
-        tokenProgramId,
-        poolToken,
-        feeAccount,
+  return {
+    tokenMint,
+    tokenIx: [
+      SystemProgram.createAccount({
+        fromPubkey: walletPubKey,
+        newAccountPubkey: tokenMint.publicKey,
+        lamports: balanceNeeded,
+        space: MintLayout.span,
+        programId: TOKEN_PROGRAM_ID,
+      }),
+      Token.createInitMintInstruction(
+        TOKEN_PROGRAM_ID,
+        tokenMint.publicKey,
+        decimals,
         authority,
-        tokenAccountA,
-        tokenAccountB,
-        mintA,
-        mintB,
-        tradeFeeNumerator,
-        tradeFeeDenominator,
-        ownerTradeFeeNumerator,
-        ownerTradeFeeDenominator,
-        ownerWithdrawFeeNumerator,
-        ownerWithdrawFeeDenominator,
-        hostFeeNumerator,
-        hostFeeDenominator,
-        curveType,
-    }
-}
+        freezeAuthority
+      ),
+    ],
+  };
+};
 
-export const generateTokenMintInstructions = async (connection: web3.Connection, wallet: Wallet, authority: web3.PublicKey, freezeAuthority: web3.PublicKey | null, decimals: number) => {
+export const generateCreateTokenAccountInstructions = async (
+  connection: web3.Connection,
+  walletPubKey: web3.PublicKey,
+  mint: web3.PublicKey,
+  owner: web3.PublicKey
+) => {
+  const tokenAccount = Keypair.generate();
+  const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(
+    connection
+  );
 
-    const tokenMint = Keypair.generate();
-    const balanceNeeded = await Token.getMinBalanceRentForExemptMint(connection);
+  return {
+    tokenAccount,
+    accountIx: [
+      SystemProgram.createAccount({
+        fromPubkey: walletPubKey,
+        newAccountPubkey: tokenAccount.publicKey,
+        lamports: balanceNeeded,
+        space: AccountLayout.span,
+        programId: TOKEN_PROGRAM_ID,
+      }),
+      Token.createInitAccountInstruction(
+        TOKEN_PROGRAM_ID,
+        mint,
+        tokenAccount.publicKey,
+        owner
+      ),
+    ],
+  };
+};
 
-    return {
-        tokenMint,
-        tokenIx: [
-            SystemProgram.createAccount({
-                fromPubkey: wallet.publicKey,
-                newAccountPubkey: tokenMint.publicKey,
-                lamports: balanceNeeded,
-                space: MintLayout.span,
-                programId: TOKEN_PROGRAM_ID
-            }),
-            Token.createInitMintInstruction(
-                TOKEN_PROGRAM_ID,
-                tokenMint.publicKey,
-                decimals,
-                authority,
-                freezeAuthority
-            )
-        ]
-    }
-}
+export const simulateTransaction = async (
+  tx: any,
+  walletPubKey: web3.PublicKey,
+  connection: web3.Connection,
+  opts: any,
+  includeAccounts: web3.PublicKey[]
+) => {
+  tx.feePayer = walletPubKey;
+  tx.recentBlockhash = (
+    await connection.getRecentBlockhash(opts.preflightCommitment)
+  ).blockhash;
 
-export const generateCreateTokenAccountInstructions = async (connection: web3.Connection, wallet: Wallet, mint: web3.PublicKey, owner: web3.PublicKey) => {
-
-    const tokenAccount = Keypair.generate();
-    const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(connection);
-
-    return {
-        tokenAccount,
-        accountIx: [
-            SystemProgram.createAccount({
-                fromPubkey: wallet.publicKey,
-                newAccountPubkey: tokenAccount.publicKey,
-                lamports: balanceNeeded,
-                space: AccountLayout.span,
-                programId: TOKEN_PROGRAM_ID
-            }),
-            Token.createInitAccountInstruction(
-                TOKEN_PROGRAM_ID,
-                mint,
-                tokenAccount.publicKey,
-                owner
-            )
-        ]
-    }
-}
-
-export const simulateTransaction = async (tx: any, wallet: Wallet, connection: web3.Connection, opts: any, includeAccounts: web3.PublicKey[]) => {
-
-
-    tx.feePayer = wallet.publicKey;
-    tx.recentBlockhash = (
-        await connection.getRecentBlockhash(
-            opts.preflightCommitment
-        )
-    ).blockhash;
-
+  // @ts-ignore
+  tx.recentBlockhash = await connection._recentBlockhash(
     // @ts-ignore
-    tx.recentBlockhash = await connection._recentBlockhash(
-        // @ts-ignore
-        connection._disableBlockhashCaching
-    );
+    connection._disableBlockhashCaching
+  );
 
-    const commitment = opts.commitment ?? "processed";
+  const commitment = opts.commitment ?? "processed";
 
-    const message = tx._compile();
-    const signData = tx.serializeMessage();
-    // @ts-ignore
-    const wireTransaction = tx._serialize(signData);
-    const encodedTransaction = wireTransaction.toString("base64");
-    const config: any = { encoding: "base64", commitment };
+  const message = tx._compile();
+  const signData = tx.serializeMessage();
+  // @ts-ignore
+  const wireTransaction = tx._serialize(signData);
+  const encodedTransaction = wireTransaction.toString("base64");
+  const config: any = { encoding: "base64", commitment };
 
-    if (includeAccounts) {
-        const addresses = (
-            Array.isArray(includeAccounts)
-                ? includeAccounts
-                : message.nonProgramIds()
-            // @ts-ignore
-        ).map(key => key.toBase58());
+  if (includeAccounts) {
+    const addresses = (
+      Array.isArray(includeAccounts) ? includeAccounts : message.nonProgramIds()
+    )
+      // @ts-ignore
+      .map((key) => key.toBase58());
 
-        config['accounts'] = {
-            encoding: 'base64',
-            addresses,
-        };
-    }
+    config["accounts"] = {
+      encoding: "base64",
+      addresses,
+    };
+  }
 
-    const args = [encodedTransaction, config];
+  const args = [encodedTransaction, config];
 
-    // @ts-ignore
-    const res = await connection._rpcRequest("simulateTransaction", args);
-    if (res.error) {
-        throw new Error("failed to simulate transaction: " + res.error.message);
-    }
-    return res.result;
+  // @ts-ignore
+  const res = await connection._rpcRequest("simulateTransaction", args);
+  if (res.error) {
+    throw new Error("failed to simulate transaction: " + res.error.message);
+  }
+  return res.result;
+};
 
-}
+export const addTxPayerAndHash = async (
+  transaction: web3.Transaction,
+  connection: web3.Connection,
+  payer: web3.PublicKey
+) => {
+  // add fee payer and recent block hash to tx
+  transaction.feePayer = payer;
+  transaction.recentBlockhash = (
+    await connection.getRecentBlockhash()
+  ).blockhash;
+};
 
+//partially sign tx with array of Keypairs
+export const partialSignTx = async (
+  transaction: web3.Transaction,
+  signers: web3.Keypair[]
+) => {
+  // partially sign setup transaction with generated accounts
+
+  transaction.partialSign(...signers);
+  return transaction;
+};
+
+//sign tx with given wallet and broadcast tx
+export const sendTx = async (
+  wallet: Wallet,
+  connection: Connection,
+  transaction: web3.Transaction,
+  txOpts: web3.ConfirmOptions
+) => {
+  //sign tx with wallet
+  await wallet.signTransaction(transaction);
+
+  const rawTx = transaction.serialize();
+  return await sendAndConfirmRawTransaction(connection, rawTx, txOpts);
+};

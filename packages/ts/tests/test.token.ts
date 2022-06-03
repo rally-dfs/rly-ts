@@ -1,108 +1,113 @@
-import { web3, BN, Provider } from "@project-serum/anchor"
-import assert from 'assert';
-import { Token, TOKEN_PROGRAM_ID, u64, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { web3, BN, Provider } from "@project-serum/anchor";
+import assert from "assert";
+import {
+  Token,
+  TOKEN_PROGRAM_ID,
+  u64,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { NodeWallet } from "@metaplex/js";
-import { addMetadata, createToken, getMetadata, getMintInfo, getTokenAccountInfo } from "../src"
+import { addMetadata, createToken, getMetadata, getMintInfo } from "../src";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
+describe("spl token", () => {
+  let wallet;
+  let connection;
+  let tokenMint;
+  let tx;
+  const initialSupply = new BN(10_000 * 10 ** 9);
+  const name = "TestToken";
+  const symbol = "TKNSYMBL";
+  const decimals = 9;
 
-describe('spl token', () => {
+  before(async () => {
+    const walletKeyPair = Keypair.generate();
+    const receiver = Keypair.generate();
+    connection = new Connection(clusterApiUrl("devnet"));
+    wallet = new NodeWallet(walletKeyPair);
+    await connection.confirmTransaction(
+      await connection.requestAirdrop(wallet.publicKey, LAMPORTS_PER_SOL)
+    );
+    await connection.confirmTransaction(
+      await connection.requestAirdrop(receiver.publicKey, LAMPORTS_PER_SOL)
+    );
+  });
 
-    let wallet;
-    let connection;
-    let tokenMint;
-    let tx
-    const initialSupply = new BN(10_000 * 10 ** 9);
-    const name = "TestToken";
-    const symbol = "TKNSYMBL";
-    const decimals = 9
+  it("should create a new spl token with metadata", async () => {
+    ({ tx, tokenMint } = await createToken({
+      initialSupply,
+      tokenData: { name, symbol, decimals },
+      connection,
+      wallet,
+      freezeAuthority: true,
+    }));
 
-    before(async () => {
-        const walletKeyPair = Keypair.generate();
-        const receiver = Keypair.generate();
-        connection = new Connection(clusterApiUrl("devnet"))
-        wallet = new NodeWallet(walletKeyPair)
-        await connection.confirmTransaction(await connection.requestAirdrop(wallet.publicKey, LAMPORTS_PER_SOL))
-        await connection.confirmTransaction(await connection.requestAirdrop(receiver.publicKey, LAMPORTS_PER_SOL))
+    await connection.confirmTransaction(tx);
+    const data = await getMetadata({ tokenMint, connection });
+    const mintInfo = await getMintInfo({ tokenMint, connection });
 
-    })
+    assert.strictEqual(
+      mintInfo.freezeAuthority.toBase58(),
+      wallet.publicKey.toBase58()
+    );
+    assert.strictEqual(data.name, name);
+    assert.strictEqual(data.symbol, symbol);
+  });
 
+  it("should create a new spl token with metadata and no freeze authority", async () => {
+    ({ tx, tokenMint } = await createToken({
+      initialSupply,
+      tokenData: { name, symbol, decimals },
+      connection,
+      wallet,
+      freezeAuthority: false,
+    }));
 
-    it('should create a new spl token with metadata', async () => {
+    await connection.confirmTransaction(tx);
+    const data = await getMetadata({ tokenMint, connection });
+    const mintInfo = await getMintInfo({ tokenMint, connection });
 
-        ({ tx, tokenMint } = await createToken({
-            initialSupply,
-            tokenData: { name, symbol, decimals },
-            connection,
-            wallet,
-            freezeAuthority: true,
-        }))
+    assert.strictEqual(mintInfo.freezeAuthority, null);
+    assert.strictEqual(data.name, name);
+    assert.strictEqual(data.symbol, symbol);
+  });
 
-        await connection.confirmTransaction(tx)
-        const data = await getMetadata({ tokenMint, connection })
-        const mintInfo = await getMintInfo({ tokenMint, connection })
+  it("should add metadata to an existing fungible token mint", async () => {
+    const { payer } = wallet;
 
-        assert.strictEqual(mintInfo.freezeAuthority.toBase58(), wallet.publicKey.toBase58())
-        assert.strictEqual(data.name, name);
-        assert.strictEqual(data.symbol, symbol);
+    const tokenMint = await Token.createMint(
+      connection,
+      payer,
+      payer.publicKey,
+      null,
+      9,
+      TOKEN_PROGRAM_ID
+    );
 
-    })
+    const tokenAccount = await tokenMint.createAssociatedTokenAccount(
+      wallet.publicKey
+    );
 
-    it('should create a new spl token with metadata and no freeze authority', async () => {
+    await tokenMint.mintTo(
+      tokenAccount,
+      wallet.publicKey,
+      [],
+      new u64(initialSupply.toString())
+    );
 
-        ({ tx, tokenMint } = await createToken({
-            initialSupply,
-            tokenData: { name, symbol, decimals },
-            connection,
-            wallet,
-            freezeAuthority: false,
-        }))
+    const tx = await addMetadata({
+      tokenMint,
+      tokenData: { name, symbol, decimals },
+      connection,
+      wallet,
+    });
 
-        await connection.confirmTransaction(tx)
-        const data = await getMetadata({ tokenMint, connection })
-        const mintInfo = await getMintInfo({ tokenMint, connection })
-
-        assert.strictEqual(mintInfo.freezeAuthority, null)
-        assert.strictEqual(data.name, name);
-        assert.strictEqual(data.symbol, symbol);
-
-    })
-
-    it('should add metadata to an existing fungible token mint', async () => {
-
-        const { payer } = wallet;
-
-        const tokenMint = await Token.createMint(
-            connection,
-            payer,
-            payer.publicKey,
-            null,
-            9,
-            TOKEN_PROGRAM_ID
-        );
-
-        const tokenAccount = await tokenMint.createAssociatedTokenAccount(wallet.publicKey);
-
-
-        await tokenMint.mintTo(
-            tokenAccount,
-            wallet.publicKey,
-            [],
-            new u64(initialSupply.toString())
-        )
-
-        const tx = await addMetadata({
-            tokenMint,
-            tokenData: { name, symbol, decimals },
-            connection,
-            wallet
-        })
-
-        await connection.confirmTransaction(tx)
-        const data = await getMetadata({ tokenMint: tokenMint.publicKey, connection })
-        assert.strictEqual(data.name, name);
-        assert.strictEqual(data.symbol, symbol);
-
-    })
-
-})
+    await connection.confirmTransaction(tx);
+    const data = await getMetadata({
+      tokenMint: tokenMint.publicKey,
+      connection,
+    });
+    assert.strictEqual(data.name, name);
+    assert.strictEqual(data.symbol, symbol);
+  });
+});

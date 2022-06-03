@@ -1,12 +1,28 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Program, web3, BN, Provider } from "@project-serum/anchor";
 import { Wallet, NodeWallet } from "@metaplex/js";
-
+import { partialSignTx, sendTx, addTxPayerAndHash } from "../../utils";
 const {
   PublicKey,
   SystemProgram: { programId },
   Transaction,
 } = web3;
+
+interface executeSwapTxParams {
+  tokenSwap: Program;
+  tokenSwapInfo: web3.PublicKey;
+  amountIn: BN;
+  amountOut: BN;
+  userTransferAuthority: web3.PublicKey;
+  userSourceTokenAccount: web3.PublicKey;
+  userDestinationTokenAccount: web3.PublicKey;
+  swapSourceTokenAccount: web3.PublicKey;
+  swapDestinationTokenAccount: web3.PublicKey;
+  poolMintAccount: web3.PublicKey;
+  poolFeeAccount: web3.PublicKey;
+  walletPubKey: web3.PublicKey;
+  connection: web3.Connection;
+}
 
 interface executeSwapParams {
   tokenSwap: Program;
@@ -30,7 +46,7 @@ interface executeSwapOpts {
   userTransferAuthorityOwner?: NodeWallet;
 }
 
-export const executeSwap = async (
+export const executeSwapTx = async (
   {
     tokenSwap,
     tokenSwapInfo,
@@ -43,17 +59,12 @@ export const executeSwap = async (
     swapDestinationTokenAccount,
     poolMintAccount,
     poolFeeAccount,
-    wallet,
+    walletPubKey,
     connection,
-  } = {} as executeSwapParams,
+  } = {} as executeSwapTxParams,
   { userTransferAuthorityOwner } = {} as executeSwapOpts
-) => {
-  const provider = new Provider(connection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "processed",
-  });
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
-
   // get exepcted swap authority PDA
 
   const [expectedSwapAuthorityPDA] = await PublicKey.findProgramAddress(
@@ -77,7 +88,51 @@ export const executeSwap = async (
   });
 
   transaction.add(ix);
-  return provider.send(transaction, [
-    userTransferAuthorityOwner && userTransferAuthorityOwner.payer,
-  ]);
+
+  await addTxPayerAndHash(transaction, connection, walletPubKey);
+
+  userTransferAuthorityOwner &&
+    (await partialSignTx(transaction, [userTransferAuthorityOwner.payer]));
+  return transaction;
+};
+
+export const executeSwap = async (
+  {
+    tokenSwap,
+    tokenSwapInfo,
+    amountIn,
+    amountOut,
+    userTransferAuthority,
+    userSourceTokenAccount,
+    userDestinationTokenAccount,
+    swapSourceTokenAccount,
+    swapDestinationTokenAccount,
+    poolMintAccount,
+    poolFeeAccount,
+    wallet,
+    connection,
+  } = {} as executeSwapParams,
+  { userTransferAuthorityOwner } = {} as executeSwapOpts
+): Promise<web3.TransactionSignature> => {
+  const transaction = await executeSwapTx(
+    {
+      tokenSwap,
+      tokenSwapInfo,
+      amountIn,
+      amountOut,
+      userTransferAuthority,
+      userSourceTokenAccount,
+      userDestinationTokenAccount,
+      swapSourceTokenAccount,
+      swapDestinationTokenAccount,
+      poolMintAccount,
+      poolFeeAccount,
+      walletPubKey: wallet.publicKey,
+      connection,
+    },
+    { userTransferAuthorityOwner }
+  );
+  return sendTx(wallet, connection, transaction, {
+    commitment: "finalized",
+  });
 };

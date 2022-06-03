@@ -2,6 +2,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Program, web3, Provider } from "@project-serum/anchor";
 import { config } from "../../../config";
 import { Wallet } from "@metaplex/js";
+import { sendTx, partialSignTx, addTxPayerAndHash } from "../../utils";
 const {
   pda: { CANONICAL_MINT_AUTHORITY_PDA_SEED },
   accountLayout: { CANONICAL_DATA_SPACE },
@@ -12,6 +13,15 @@ const {
   Transaction,
 } = web3;
 
+interface intitializeCanonicalTokenTxParams {
+  canSwap: Program;
+  canonicalMint: web3.PublicKey;
+  canonicalData: any;
+  canonicalAuthority: web3.PublicKey;
+  walletPubKey: web3.PublicKey;
+  connection: web3.Connection;
+}
+
 interface intitializeCanonicalTokenParams {
   canSwap: Program;
   canonicalMint: web3.PublicKey;
@@ -21,20 +31,16 @@ interface intitializeCanonicalTokenParams {
   wallet: Wallet;
 }
 
-export const initializeCanonicalToken = async (
+export const initializeCanonicalTxToken = async (
   {
     canSwap,
     canonicalMint,
     canonicalData,
     canonicalAuthority,
+    walletPubKey,
     connection,
-    wallet,
-  } = {} as intitializeCanonicalTokenParams
-) => {
-  const provider = new Provider(connection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "processed",
-  });
+  } = {} as intitializeCanonicalTokenTxParams
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
   const [expectedMintAuthorityPDA] = await PublicKey.findProgramAddress(
@@ -59,5 +65,28 @@ export const initializeCanonicalToken = async (
   });
 
   transaction.add(canDataiX, initIx);
-  return provider.send(transaction, [canonicalData]);
+  await addTxPayerAndHash(transaction, connection, walletPubKey);
+  await partialSignTx(transaction, [canonicalData]);
+  return transaction;
+};
+
+export const initializeCanonicalToken = async (
+  {
+    canSwap,
+    canonicalMint,
+    canonicalData,
+    canonicalAuthority,
+    connection,
+    wallet,
+  } = {} as intitializeCanonicalTokenParams
+): Promise<web3.TransactionSignature> => {
+  const transaction = await initializeCanonicalTxToken({
+    canSwap,
+    canonicalMint,
+    canonicalData,
+    canonicalAuthority,
+    walletPubKey: wallet.publicKey,
+    connection,
+  });
+  return sendTx(wallet, connection, transaction, { commitment: "finalized" });
 };
