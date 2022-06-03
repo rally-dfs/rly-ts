@@ -1,29 +1,32 @@
 import { Token } from "@solana/spl-token";
-import { actions, Wallet } from "@metaplex/js";
-const { createMetadata } = actions;
+import { Wallet } from "@metaplex/js";
 import {
   MetadataDataData,
   Metadata,
   CreateMetadata,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { TokenData } from "../types";
-import { Provider, web3 } from "@project-serum/anchor";
+import { web3 } from "@project-serum/anchor";
+import { addTxPayerAndHash, sendTx } from "../utils";
 const { Transaction } = web3;
+
+interface addMetadataTxParams {
+  tokenMint: Token;
+  tokenData: TokenData;
+  connection: web3.Connection;
+  walletPubKey: web3.PublicKey;
+}
 
 interface addMetadataParams {
   tokenMint: Token;
   tokenData: TokenData;
-  connection: any;
+  connection: web3.Connection;
   wallet: Wallet;
 }
 
-export const addMetadata = async (
-  { tokenMint, tokenData, connection, wallet } = {} as addMetadataParams
+export const addMetadataTx = async (
+  { tokenMint, tokenData, connection, walletPubKey } = {} as addMetadataTxParams
 ) => {
-  const provider = new Provider(connection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "processed",
-  });
   const transaction = new Transaction();
 
   const metadataData = new MetadataDataData({
@@ -41,17 +44,30 @@ export const addMetadata = async (
   // create metadata Tx
 
   const createMetadataTx = new CreateMetadata(
-    { feePayer: wallet.publicKey },
+    { feePayer: walletPubKey },
     {
       metadata,
       metadataData,
-      updateAuthority: wallet.publicKey,
+      updateAuthority: walletPubKey,
       mint: tokenMint.publicKey,
-      mintAuthority: wallet.publicKey,
+      mintAuthority: walletPubKey,
     }
   );
 
   transaction.add(createMetadataTx);
+  await addTxPayerAndHash(transaction, connection, walletPubKey);
+  return transaction;
+};
 
-  return provider.send(transaction, []);
+export const addMetadata = async (
+  { tokenMint, tokenData, connection, wallet } = {} as addMetadataParams
+) => {
+  const transaction = await addMetadataTx({
+    tokenMint,
+    tokenData,
+    connection,
+    walletPubKey: wallet.publicKey,
+  });
+
+  return sendTx(wallet, connection, transaction, { commitment: "finalized" });
 };
