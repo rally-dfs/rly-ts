@@ -46,7 +46,7 @@ export const initializeWrappedTokenTx = async (
     walletPubKey,
     connection,
   } = {} as initializeWrappedTokenTxParams
-) => {
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
   const [wrappedTokenAccount] = await PublicKey.findProgramAddress(
@@ -100,7 +100,7 @@ export const initializeWrappedToken = async (
     connection,
     wallet,
   } = {} as initializeWrappedTokenParams
-) => {
+): Promise<web3.TransactionSignature> => {
   const transaction = await initializeWrappedTokenTx({
     canSwap,
     wrappedMint,

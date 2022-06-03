@@ -47,7 +47,7 @@ export const swapWrappedForCanonicalTx = async (
     walletPubKey,
     connection,
   } = {} as swapWrappedForCanonicalTxParams
-) => {
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
   const [expectedMintAuthorityPDA] = await web3.PublicKey.findProgramAddress(
@@ -91,7 +91,7 @@ export const swapWrappedForCanonical = async (
     wallet,
     connection,
   } = {} as swapWrappedForCanonicalParams
-) => {
+): Promise<web3.TransactionSignature> => {
   const transaction = await swapWrappedForCanonicalTx({
     canSwap,
     canonicalMint,

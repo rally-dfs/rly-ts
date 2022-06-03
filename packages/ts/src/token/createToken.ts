@@ -17,6 +17,12 @@ import { partialSignTx, addTxPayerAndHash } from "../utils";
 import { sendToken } from "@metaplex/js/lib/actions";
 const { Transaction } = web3;
 
+interface createTokenTxResults {
+  transaction: web3.Transaction;
+  tokenMint: web3.PublicKey;
+  tokenAccount: web3.PublicKey;
+}
+
 interface createTokenTxParams {
   initialSupply: BN;
   tokenData: TokenData;
@@ -43,7 +49,7 @@ export const createTokenTx = async (
     walletPubKey,
     freezeAuthority,
   } = {} as createTokenTxParams
-) => {
+): Promise<createTokenTxResults> => {
   const transaction = new Transaction();
 
   // create mint
@@ -117,7 +123,7 @@ export const createTokenTx = async (
   transaction.add(...tokenIx, associatedAcctIx, mintToIx, createMetadataTx);
   await addTxPayerAndHash(transaction, connection, walletPubKey);
   await partialSignTx(transaction, [tokenMint]);
-  return transaction;
+  return { transaction, tokenMint: tokenMint.publicKey, tokenAccount };
 };
 
 export const createToken = async (
@@ -129,7 +135,7 @@ export const createToken = async (
     freezeAuthority,
   } = {} as createTokenParams
 ) => {
-  const transaction = await createTokenTx({
+  const { transaction, tokenMint, tokenAccount } = await createTokenTx({
     initialSupply,
     tokenData,
     connection,
@@ -137,5 +143,9 @@ export const createToken = async (
     freezeAuthority,
   });
 
-  return sendTx(wallet, connection, transaction, { commitment: "finalized" });
+  const tx = await sendTx(wallet, connection, transaction, {
+    commitment: "finalized",
+  });
+
+  return { tx, tokenMint: tokenMint, tokenAccount };
 };

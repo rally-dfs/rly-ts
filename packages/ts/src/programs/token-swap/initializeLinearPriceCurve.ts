@@ -10,12 +10,23 @@ import {
   partialSignTx,
   addTxPayerAndHash,
 } from "../../utils";
+import { JsonWebKey } from "crypto";
 
 const {
   accountLayout: { SWAP_ACCOUNT_SPACE },
 } = config;
 
 const { PublicKey, Transaction } = web3;
+
+interface initializeLinearPriceCurveTxResults {
+  setupTransaction: web3.Transaction;
+  initTbcTransaction: web3.Transaction;
+}
+
+interface initializeLinearPriceCurveResults {
+  tx: web3.TransactionSignature;
+  setupTx: web3.TransactionSignature;
+}
 
 interface initializeLinearPriceCurveTxParams {
   tokenSwap: Program;
@@ -79,7 +90,7 @@ export const initializeLinearPriceCurveTx = async (
     callerTokenBAccountOwner,
     adminAccountOwner,
   } = {} as initializeLinearPriceCurveOpts
-) => {
+): Promise<initializeLinearPriceCurveTxResults> => {
   // initialize required transactions, split into two transactions as combined the transations are > the 1232 bytes limit for solana
 
   // setupTransaction creates required accounts for tbc
@@ -260,7 +271,7 @@ export const initializeLinearPriceCurve = async (
     callerTokenBAccountOwner,
     adminAccountOwner,
   } = {} as initializeLinearPriceCurveOpts
-) => {
+): Promise<initializeLinearPriceCurveResults> => {
   const { setupTransaction, initTbcTransaction } =
     await initializeLinearPriceCurveTx(
       {

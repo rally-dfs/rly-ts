@@ -40,7 +40,7 @@ export const initializeCanonicalTxToken = async (
     walletPubKey,
     connection,
   } = {} as intitializeCanonicalTokenTxParams
-) => {
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
   const [expectedMintAuthorityPDA] = await PublicKey.findProgramAddress(
@@ -79,7 +79,7 @@ export const initializeCanonicalToken = async (
     connection,
     wallet,
   } = {} as intitializeCanonicalTokenParams
-) => {
+): Promise<web3.TransactionSignature> => {
   const transaction = await initializeCanonicalTxToken({
     canSwap,
     canonicalMint,

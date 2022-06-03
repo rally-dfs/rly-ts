@@ -63,7 +63,7 @@ export const executeSwapTx = async (
     connection,
   } = {} as executeSwapTxParams,
   { userTransferAuthorityOwner } = {} as executeSwapOpts
-) => {
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
   // get exepcted swap authority PDA
 
@@ -113,7 +113,7 @@ export const executeSwap = async (
     connection,
   } = {} as executeSwapParams,
   { userTransferAuthorityOwner } = {} as executeSwapOpts
-) => {
+): Promise<web3.TransactionSignature> => {
   const transaction = await executeSwapTx(
     {
       tokenSwap,

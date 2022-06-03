@@ -365,6 +365,7 @@ export const sendTx = async (
   transaction: web3.Transaction,
   txOpts: web3.ConfirmOptions
 ) => {
+  //sign tx with wallet
   await wallet.signTransaction(transaction);
 
   const rawTx = transaction.serialize();

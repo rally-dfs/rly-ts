@@ -26,7 +26,7 @@ interface addMetadataParams {
 
 export const addMetadataTx = async (
   { tokenMint, tokenData, connection, walletPubKey } = {} as addMetadataTxParams
-) => {
+): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
   const metadataData = new MetadataDataData({
@@ -61,7 +61,7 @@ export const addMetadataTx = async (
 
 export const addMetadata = async (
   { tokenMint, tokenData, connection, wallet } = {} as addMetadataParams
-) => {
+): Promise<web3.TransactionSignature> => {
   const transaction = await addMetadataTx({
     tokenMint,
     tokenData,
