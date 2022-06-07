@@ -293,15 +293,10 @@ export const simulateTransaction = async (
   includeAccounts: web3.PublicKey[]
 ) => {
   tx.feePayer = walletPubKey;
-  tx.recentBlockhash = (
-    await connection.getRecentBlockhash(opts.preflightCommitment)
-  ).blockhash;
 
-  // @ts-ignore
-  tx.recentBlockhash = await connection._recentBlockhash(
-    // @ts-ignore
-    connection._disableBlockhashCaching
-  );
+  tx.recentBlockhash = (
+    await connection.getLatestBlockhash(opts.preflightCommitment)
+  ).blockhash;
 
   const commitment = opts.commitment ?? "processed";
 
