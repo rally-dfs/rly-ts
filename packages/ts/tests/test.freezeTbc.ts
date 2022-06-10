@@ -3,21 +3,23 @@ const chai = require("chai");
 const expect = chai.expect;
 chai.use(require("chai-as-promised"));
 
-import { web3, Provider, BN } from "@project-serum/anchor";
-import { NodeWallet } from "@metaplex/js";
+import {
+  web3,
+  AnchorProvider as Provider,
+  BN,
+  Wallet,
+} from "@project-serum/anchor";
 
 import {
   initializeLinearPriceCurve,
   executeSwap,
   tokenSwapProgram,
-  Numberu64,
   getTokenSwapInfo,
   getMintInfo,
   getTokenAccountInfo,
 } from "../src";
 
-import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { token } from "@project-serum/anchor/dist/cjs/utils";
+import { Token, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
 describe("test freeze", () => {
@@ -47,7 +49,7 @@ describe("test freeze", () => {
     tokenSwapInfo = Keypair.generate();
     provider = new Provider(
       new Connection(clusterApiUrl("devnet")),
-      new NodeWallet(walletKeyPair),
+      new Wallet(walletKeyPair),
       {}
     );
     ({ connection, wallet } = provider);
@@ -103,7 +105,7 @@ describe("test freeze", () => {
       callerTokenBAccount,
       payer,
       [],
-      Numberu64.fromBuffer(initialTokenBLiquidity.toBuffer("le", 8))
+      u64.fromBuffer(initialTokenBLiquidity.toBuffer("le", 8))
     );
   });
 

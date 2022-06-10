@@ -1,6 +1,7 @@
 import { config } from "../../config";
-import { web3, BN, Provider } from "@project-serum/anchor";
+import { BN, Provider, Wallet, web3 } from "@project-serum/anchor";
 import * as BufferLayout from "@solana/buffer-layout";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
   u64,
   AccountLayout,
@@ -8,10 +9,13 @@ import {
   MintLayout,
   Token,
 } from "@solana/spl-token";
-import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import { Connection } from "@metaplex/js";
-const { PublicKey, SystemProgram, Keypair, sendAndConfirmRawTransaction } =
-  web3;
+const {
+  PublicKey,
+  SystemProgram,
+  Keypair,
+  sendAndConfirmRawTransaction,
+  Connection,
+} = web3;
 
 const {
   accountLayout: { SWAP_ACCOUNT_SPACE },
@@ -103,30 +107,6 @@ const TokenSwapLayout = BufferLayout.struct([
   BufferLayout.blob(32, "curveParameters"),
 ]);
 
-export class Numberu64 extends BN {
-  toBuffer(): Buffer {
-    const a = super.toArray().reverse();
-    const b = Buffer.from(a);
-    if (b.length === 8) {
-      return b;
-    }
-
-    const zeroPad = Buffer.alloc(8);
-    b.copy(zeroPad);
-    return zeroPad;
-  }
-
-  static fromBuffer(buffer: Buffer): Numberu64 {
-    return new Numberu64(
-      [...buffer]
-        .reverse()
-        .map((i) => `00${i.toString(16)}`.slice(-2))
-        .join(""),
-      16
-    );
-  }
-}
-
 export const accountInfoFromSim = async (account: any) => {
   let data = account.data;
   data = Buffer.from(data[0], data[1]);
@@ -155,10 +135,15 @@ export const getTokenSwapInfo = async (
   programId: web3.PublicKey
 ) => {
   const data = await loadAccount(connection, swapInfoPubKey, programId);
+
   const tokenSwapData = TokenSwapLayout.decode(data);
+  // @ts-ignore
+
   if (!tokenSwapData.isInitialized) {
     throw new Error(`Invalid token swap state`);
   }
+
+  // @ts-ignore
 
   if (!tokenSwapData.isInitialized) {
     throw new Error(`Invalid token swap state`);
@@ -169,36 +154,68 @@ export const getTokenSwapInfo = async (
     programId
   );
 
+  // @ts-ignore
+
   const poolToken = new PublicKey(tokenSwapData.tokenPool);
+  // @ts-ignore
+
   const feeAccount = new PublicKey(tokenSwapData.feeAccount);
+  // @ts-ignore
+
   const tokenAccountA = new PublicKey(tokenSwapData.tokenAccountA);
+  // @ts-ignore
+
   const tokenAccountB = new PublicKey(tokenSwapData.tokenAccountB);
+  // @ts-ignore
+
   const mintA = new PublicKey(tokenSwapData.mintA);
+  // @ts-ignore
+
   const mintB = new PublicKey(tokenSwapData.mintB);
+  // @ts-ignore
+
   const tokenProgramId = new PublicKey(tokenSwapData.tokenProgramId);
 
-  const tradeFeeNumerator = Numberu64.fromBuffer(
+  const tradeFeeNumerator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.tradeFeeNumerator
   );
-  const tradeFeeDenominator = Numberu64.fromBuffer(
+  const tradeFeeDenominator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.tradeFeeDenominator
   );
-  const ownerTradeFeeNumerator = Numberu64.fromBuffer(
+  const ownerTradeFeeNumerator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerTradeFeeNumerator
   );
-  const ownerTradeFeeDenominator = Numberu64.fromBuffer(
+  const ownerTradeFeeDenominator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerTradeFeeDenominator
   );
-  const ownerWithdrawFeeNumerator = Numberu64.fromBuffer(
+  const ownerWithdrawFeeNumerator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerWithdrawFeeNumerator
   );
-  const ownerWithdrawFeeDenominator = Numberu64.fromBuffer(
+  const ownerWithdrawFeeDenominator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerWithdrawFeeDenominator
   );
-  const hostFeeNumerator = Numberu64.fromBuffer(tokenSwapData.hostFeeNumerator);
-  const hostFeeDenominator = Numberu64.fromBuffer(
+  // @ts-ignore
+
+  const hostFeeNumerator = u64.fromBuffer(tokenSwapData.hostFeeNumerator);
+  const hostFeeDenominator = u64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.hostFeeDenominator
   );
+  // @ts-ignore
+
   const curveType = tokenSwapData.curveType;
 
   return {
@@ -337,9 +354,13 @@ export const addTxPayerAndHash = async (
 ) => {
   // add fee payer and recent block hash to tx
   transaction.feePayer = payer;
-  transaction.recentBlockhash = (
-    await connection.getRecentBlockhash()
-  ).blockhash;
+  const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+
+  transaction.recentBlockhash = blockhash;
+  transaction.lastValidBlockHeight = lastValidBlockHeight;
+
+  return transaction;
 };
 
 //partially sign tx with array of Keypairs
@@ -356,7 +377,7 @@ export const partialSignTx = async (
 //sign tx with given wallet and broadcast tx
 export const sendTx = async (
   wallet: Wallet,
-  connection: Connection,
+  connection: web3.Connection,
   transaction: web3.Transaction,
   txOpts: web3.ConfirmOptions
 ) => {
@@ -364,5 +385,20 @@ export const sendTx = async (
   await wallet.signTransaction(transaction);
 
   const rawTx = transaction.serialize();
-  return await sendAndConfirmRawTransaction(connection, rawTx, txOpts);
+
+  const { lastValidBlockHeight, signature, recentBlockhash } = transaction;
+
+  const confirmationStrategy: web3.BlockheightBasedTransactionConfirmationStrategy =
+    {
+      lastValidBlockHeight,
+      signature: bs58.encode(signature),
+      blockhash: recentBlockhash,
+    };
+
+  return await sendAndConfirmRawTransaction(
+    connection,
+    rawTx,
+    confirmationStrategy,
+    txOpts
+  );
 };

@@ -1,14 +1,18 @@
 import { Token } from "@solana/spl-token";
-import { Wallet } from "@metaplex/js";
 import {
-  MetadataDataData,
-  Metadata,
-  CreateMetadata,
+  DataV2,
+  CreateMetadataAccountV2InstructionAccounts,
+  CreateMetadataAccountArgsV2,
+  CreateMetadataAccountV2InstructionArgs,
+  createCreateMetadataAccountV2Instruction,
+  PROGRAM_ADDRESS,
+  Data,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { TokenData } from "../types";
-import { web3 } from "@project-serum/anchor";
+import { config } from "../../config";
+import { web3, Wallet } from "@project-serum/anchor";
 import { addTxPayerAndHash, sendTx } from "../utils";
-const { Transaction } = web3;
+const { Transaction, PublicKey } = web3;
 
 interface addMetadataTxParams {
   tokenMint: Token;
@@ -29,32 +33,50 @@ export const addMetadataTx = async (
 ): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
-  const metadataData = new MetadataDataData({
+  const metadataProgramAddress = new PublicKey(PROGRAM_ADDRESS);
+
+  const [metadata] = await PublicKey.findProgramAddress(
+    [
+      config.pda.METADATA,
+      metadataProgramAddress.toBuffer(),
+      tokenMint.publicKey.toBuffer(),
+    ],
+    metadataProgramAddress
+  );
+
+  const data = {
     name: tokenData.name,
     symbol: tokenData.symbol,
     uri: "",
     sellerFeeBasisPoints: null,
     creators: null,
-  });
+    collection: null,
+    uses: null,
+  } as DataV2;
 
-  // get metadata PDA
+  const accounts = {
+    metadata,
+    mint: tokenMint.publicKey,
+    mintAuthority: walletPubKey,
+    updateAuthority: walletPubKey,
+    payer: walletPubKey,
+  } as CreateMetadataAccountV2InstructionAccounts;
 
-  const metadata = await Metadata.getPDA(tokenMint.publicKey);
+  const createMetadataAccountArgsV2 = {
+    data,
+    isMutable: true,
+  } as CreateMetadataAccountArgsV2;
 
-  // create metadata Tx
+  const args = {
+    createMetadataAccountArgsV2,
+  } as CreateMetadataAccountV2InstructionArgs;
 
-  const createMetadataTx = new CreateMetadata(
-    { feePayer: walletPubKey },
-    {
-      metadata,
-      metadataData,
-      updateAuthority: walletPubKey,
-      mint: tokenMint.publicKey,
-      mintAuthority: walletPubKey,
-    }
+  const createMetadataIx = createCreateMetadataAccountV2Instruction(
+    accounts,
+    args
   );
 
-  transaction.add(createMetadataTx);
+  transaction.add(createMetadataIx);
   await addTxPayerAndHash(transaction, connection, walletPubKey);
   return transaction;
 };

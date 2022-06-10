@@ -1,19 +1,21 @@
 import assert from "assert";
 
-import { web3, Provider, BN } from "@project-serum/anchor";
-import { NodeWallet } from "@metaplex/js";
+import {
+  web3,
+  AnchorProvider as Provider,
+  BN,
+  Wallet,
+} from "@project-serum/anchor";
 import {
   initializeLinearPriceCurve,
   executeSwap,
   estimateSwap,
   tokenSwapProgram,
-  Numberu64,
   getTokenSwapInfo,
 } from "../src";
 
-import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL, PublicKey } =
-  web3;
+import { Token, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
+const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
 describe("token swap", () => {
   let provider;
@@ -47,7 +49,7 @@ describe("token swap", () => {
     tokenSwapInfo = Keypair.generate();
     provider = new Provider(
       new Connection(clusterApiUrl("devnet")),
-      new NodeWallet(walletKeyPair),
+      new Wallet(walletKeyPair),
       {}
     );
     ({ connection, wallet } = provider);
@@ -90,13 +92,13 @@ describe("token swap", () => {
       callerTokenBAccount,
       payer,
       [],
-      Numberu64.fromBuffer(initialTokenBSupply.toBuffer("le", 8))
+      u64.fromBuffer(initialTokenBSupply.toBuffer("le", 8))
     );
     await tokenB.mintTo(
       tokenBAdminTokenAccount,
       payer,
       [],
-      Numberu64.fromBuffer(initialTokenBSupply.toBuffer("le", 8))
+      u64.fromBuffer(initialTokenBSupply.toBuffer("le", 8))
     );
     await tokenA.mintTo(
       callerTokenAAccount,
@@ -148,7 +150,7 @@ describe("token swap", () => {
         initialTokenBLiquidity,
       },
       {
-        callerTokenBAccountOwner: new NodeWallet(tokenBAdmin),
+        callerTokenBAccountOwner: new Wallet(tokenBAdmin),
         adminAccountOwner: adminOwner.publicKey,
       }
     );
@@ -173,11 +175,11 @@ describe("token swap", () => {
     );
 
     assert.equal(
-      Numberu64.fromBuffer(tokenAccountAmount.toBuffer("le", 8)).toString(),
+      u64.fromBuffer(tokenAccountAmount.toBuffer("le", 8)).toString(),
       "1600000000000000"
     );
     assert.equal(
-      Numberu64.fromBuffer(userAccountAmount.toBuffer("le", 8)).toString(),
+      u64.fromBuffer(userAccountAmount.toBuffer("le", 8)).toString(),
       "500000000000000"
     );
     assert.ok(feeAmount.eq(new BN(0)));
@@ -227,7 +229,7 @@ describe("token swap", () => {
         wallet,
         connection,
       },
-      { userTransferAuthorityOwner: new NodeWallet(tokenBAdmin) }
+      { userTransferAuthorityOwner: new Wallet(tokenBAdmin) }
     );
 
     await connection.confirmTransaction(tx);
@@ -290,7 +292,7 @@ describe("token swap", () => {
         wallet,
         connection,
       },
-      { userTransferAuthorityOwner: new NodeWallet(tokenBAdmin) }
+      { userTransferAuthorityOwner: new Wallet(tokenBAdmin) }
     );
 
     await connection.confirmTransaction(tx);

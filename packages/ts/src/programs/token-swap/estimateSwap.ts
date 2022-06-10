@@ -1,6 +1,5 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Program, web3, BN, Provider } from "@project-serum/anchor";
-import { Wallet } from "@metaplex/js";
+import { Program, web3, BN } from "@project-serum/anchor";
 import { accountInfoFromSim, simulateTransaction } from "../..";
 
 const { PublicKey, Transaction } = web3;

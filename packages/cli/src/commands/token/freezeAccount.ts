@@ -1,24 +1,26 @@
-
-import { web3 } from '@project-serum/anchor';
+import { web3, Wallet } from "@project-serum/anchor";
 const { Connection, clusterApiUrl, PublicKey } = web3;
-import { NodeWallet } from '@metaplex/js';
-import { loadKeypair } from "../../utils/utils"
-import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { loadKeypair } from "../../utils/utils";
+import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export const freezeAccountCommand = async (mint, token_account, options) => {
+  // get values from options
+  const { env, keypair } = options;
 
-    // get values from options
-    const { env, keypair } = options;
+  // connect to cluster and load wallet
+  const connection = new Connection(clusterApiUrl(env));
+  const wallet = new Wallet(loadKeypair(keypair));
+  const { payer } = wallet;
 
-    // connect to cluster and load wallet
-    const connection = new Connection(clusterApiUrl(env))
-    const wallet = new NodeWallet(loadKeypair(keypair))
-    const { payer } = wallet;
+  const token = new Token(
+    connection,
+    new PublicKey(mint),
+    TOKEN_PROGRAM_ID,
+    payer
+  );
+  const tokenAccount = new PublicKey(token_account);
 
-    const token = new Token(connection, new PublicKey(mint), TOKEN_PROGRAM_ID, payer);
-    const tokenAccount = new PublicKey(token_account)
+  await token.freezeAccount(tokenAccount, payer.publicKey, []);
 
-    await token.freezeAccount(tokenAccount, payer.publicKey, []);
-
-    console.log(`${token_account} frozen for toen ${mint}`)
-}
+  console.log(`${token_account} frozen for toen ${mint}`);
+};
