@@ -6,7 +6,12 @@ import {
   swapWrappedForCanonical,
   createToken,
 } from "../src";
-import { web3, Provider, BN, Wallet } from "@project-serum/anchor";
+import {
+  web3,
+  AnchorProvider as Provider,
+  BN,
+  Wallet,
+} from "@project-serum/anchor";
 import assert from "assert";
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;

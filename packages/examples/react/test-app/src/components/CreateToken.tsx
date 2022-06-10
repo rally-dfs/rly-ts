@@ -11,13 +11,13 @@ import {
 } from "@mui/material";
 import BN from "bn.js";
 import { createToken } from "rly-js";
-import { Wallet } from "@metaplex/js";
+import { Wallet } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { EXPLORER_ROOT, NETWORK } from "../config";
 
 const CreateToken: FC = () => {
   const { connection } = useConnection();
-  const wallet = useWallet() as Wallet;
+  const wallet = useWallet() as unknown as Wallet;
 
   type createTokenValues = {
     tokenName: string;

@@ -1,10 +1,9 @@
-import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Token, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
 import { Program, web3, BN, Wallet } from "@project-serum/anchor";
 import { config } from "../../../config";
 import {
   generateTokenMintInstructions,
   generateCreateTokenAccountInstructions,
-  Numberu64,
   sendTx,
   partialSignTx,
   addTxPayerAndHash,
@@ -146,7 +145,7 @@ export const initializeLinearPriceCurveTx = async (
       ? callerTokenBAccountOwner.publicKey
       : walletPubKey,
     [],
-    Numberu64.fromBuffer(initialTokenBLiquidity.toArrayLike(Buffer, "le", 8))
+    u64.fromBuffer(initialTokenBLiquidity.toArrayLike(Buffer, "le", 8))
   );
 
   // create token accounts for fees and pool tokens owned by calling account (can't use associated token account as two accounts req'd)

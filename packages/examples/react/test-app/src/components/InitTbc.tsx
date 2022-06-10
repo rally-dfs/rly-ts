@@ -15,14 +15,14 @@ import {
   tokenSwapProgram,
   getMintInfo,
 } from "rly-js";
-import { Wallet } from "@metaplex/js";
 import { PublicKey, Keypair } from "@solana/web3.js";
 import { EXPLORER_ROOT, NETWORK } from "../config";
-import { Provider } from "@project-serum/anchor";
+import { AnchorProvider as Provider, Wallet } from "@project-serum/anchor";
 import { getAssociatedTokenAddress } from "../utils";
 const InitTbc: FC = () => {
   const { connection } = useConnection();
-  const wallet = useWallet() as Wallet;
+  const wallet = useWallet() as unknown as Wallet;
+
   const provider = new Provider(connection, wallet, {});
   let tokenSwapInfo;
 
@@ -50,7 +50,6 @@ const InitTbc: FC = () => {
   type initTbcResponse = {
     tx: string | null;
     setupTx: string | null;
-    destinationAccount: Keypair | null;
   };
 
   const defaultInitTbcRespondValues = {} as initTbcResponse;

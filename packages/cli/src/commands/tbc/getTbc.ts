@@ -1,5 +1,5 @@
 import { web3, BN } from "@project-serum/anchor";
-const { PublicKey, Keypair } = web3;
+const { PublicKey } = web3;
 import { getProvider } from "../../utils/utils";
 
 import {
@@ -62,24 +62,18 @@ export const getTbcCommand = async (tbc, options) => {
   );
   console.log("token a mint = ", swapInfo.mintA.toBase58());
   console.log("token b mint = ", swapInfo.mintB.toBase58());
-  console.log("trade fee numerator ", swapInfo.tradeFeeNumerator.toNumber());
-  console.log("trade fee denominator", swapInfo.tradeFeeDenominator.toNumber());
-  console.log(
-    "owner trade fee numerator",
-    swapInfo.ownerTradeFeeNumerator.toNumber()
-  );
-  console.log(
-    "owner trade fee denominator",
-    swapInfo.ownerTradeFeeDenominator.toNumber()
-  );
+  console.log("trade fee numerator ", swapInfo.tradeFeeNumerator);
+  console.log("trade fee denominator", swapInfo.tradeFeeDenominator);
+  console.log("owner trade fee numerator", swapInfo.ownerTradeFeeNumerator);
+  console.log("owner trade fee denominator", swapInfo.ownerTradeFeeDenominator);
   console.log(
     "owner withdraw fee numerator",
-    swapInfo.ownerWithdrawFeeNumerator.toNumber()
+    swapInfo.ownerWithdrawFeeNumerator
   );
   console.log(
     "owner withdraw fee denominator",
-    swapInfo.ownerWithdrawFeeDenominator.toNumber()
+    swapInfo.ownerWithdrawFeeDenominator
   );
-  console.log("host fee numerator", swapInfo.hostFeeNumerator.toNumber());
-  console.log("host fee denominator", swapInfo.hostFeeDenominator.toNumber());
+  console.log("host fee numerator", swapInfo.hostFeeNumerator);
+  console.log("host fee denominator", swapInfo.hostFeeDenominator);
 };

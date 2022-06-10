@@ -35,14 +35,14 @@ export const swapV2toV3Command = async (options) => {
   const v3Mint = new PublicKey(canonicalMintV3);
   const v3Data = new PublicKey(canonicalDataV3);
 
-  let { decimals } = await canSwap.account.canonicalData.fetch(v3Data);
+  const { decimals } = await canSwap.account.canonicalData.fetch(v3Data);
 
   const ten = new BN(10);
-  decimals = new BN(decimals);
+  const decimalsBN = new BN(Number(decimals));
   let destAmount = new BN(amount);
 
   //convert to decimal units
-  destAmount = destAmount.mul(ten.pow(decimals));
+  destAmount = destAmount.mul(ten.pow(decimalsBN));
 
   //decimals of destination-
 
@@ -97,7 +97,7 @@ export const swapV2toV3Command = async (options) => {
 
   console.log(
     `${destAmount
-      .div(ten.pow(decimals))
+      .div(ten.pow(decimalsBN))
       .toNumber()} of ${canonicalMintV2} swapped for ${canonicalMintV3} sent to ${v3TokenAccount.toBase58()} `
   );
   console.log(`tx sig = ${tx}`);

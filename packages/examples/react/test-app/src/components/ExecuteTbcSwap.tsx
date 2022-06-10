@@ -17,16 +17,15 @@ import {
   getMintInfo,
   getTokenAccountInfo,
 } from "rly-js";
-import { Wallet } from "@metaplex/js";
 import { PublicKey } from "@solana/web3.js";
 import { EXPLORER_ROOT, NETWORK } from "../config";
-import { Provider } from "@project-serum/anchor";
+import { AnchorProvider as Provider, Wallet } from "@project-serum/anchor";
 import BN from "bn.js";
 import { getAssociatedTokenAddress, baseToDec, decToBase } from "../utils";
 
 const ExecuteTbcSwap: FC = () => {
   const { connection } = useConnection();
-  const wallet = useWallet() as Wallet;
+  const wallet = useWallet() as unknown as Wallet;
   const provider = new Provider(connection, wallet, {});
 
   type defaultSwapValues = {
@@ -147,7 +146,7 @@ const ExecuteTbcSwap: FC = () => {
           swapDestinationTokenAccount: tokenAccountB,
           poolMintAccount: poolToken,
           poolFeeAccount: feeAccount,
-          wallet,
+          walletPubKey: wallet.publicKey,
           connection,
         }
       );

@@ -37,14 +37,14 @@ export const swapWormholeCanCommand = async (options) => {
     version === "2" ? canonicalDataV2 : canonicalDataV3
   );
 
-  let { decimals } = await canSwap.account.canonicalData.fetch(canonicalData);
+  const { decimals } = await canSwap.account.canonicalData.fetch(canonicalData);
 
   const ten = new BN(10);
-  decimals = new BN(decimals);
+  const decimalsBN = new BN(Number(decimals));
   let destAmount = new BN(amount);
 
   //convert to decimal units
-  destAmount = destAmount.mul(ten.pow(decimals));
+  destAmount = destAmount.mul(ten.pow(decimalsBN));
 
   //decimals of destination-
 
@@ -104,7 +104,7 @@ export const swapWormholeCanCommand = async (options) => {
 
   console.log(
     `${destAmount
-      .div(ten.pow(decimals))
+      .div(ten.pow(decimalsBN))
       .toNumber()} of ${wormholeMint} swapped for ${canonicalMint} sent to ${canonicalTokenAccount.toBase58()} `
   );
   console.log(`tx sig = ${tx}`);
