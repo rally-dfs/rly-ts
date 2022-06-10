@@ -1,6 +1,5 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Program, web3, BN, Provider } from "@project-serum/anchor";
-import { Wallet, NodeWallet } from "@metaplex/js";
+import { Program, web3, BN, Wallet } from "@project-serum/anchor";
 import { partialSignTx, sendTx, addTxPayerAndHash } from "../../utils";
 const {
   PublicKey,
@@ -43,7 +42,7 @@ interface executeSwapParams {
 interface executeSwapOpts {
   // if the authority over the userSourceTokenAccount and userDestinationAccount is not the caller wallet use this options
   // do not use if calling from web
-  userTransferAuthorityOwner?: NodeWallet;
+  userTransferAuthorityOwner?: Wallet;
 }
 
 export const executeSwapTx = async (

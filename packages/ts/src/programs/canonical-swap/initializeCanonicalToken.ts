@@ -1,7 +1,6 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Program, web3, Provider } from "@project-serum/anchor";
+import { Program, web3, Wallet } from "@project-serum/anchor";
 import { config } from "../../../config";
-import { Wallet } from "@metaplex/js";
 import { sendTx, partialSignTx, addTxPayerAndHash } from "../../utils";
 const {
   pda: { CANONICAL_MINT_AUTHORITY_PDA_SEED },

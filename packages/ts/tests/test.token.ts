@@ -1,12 +1,6 @@
-import { web3, BN, Provider } from "@project-serum/anchor";
+import { web3, BN, Wallet } from "@project-serum/anchor";
 import assert from "assert";
-import {
-  Token,
-  TOKEN_PROGRAM_ID,
-  u64,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
-import { NodeWallet } from "@metaplex/js";
+import { Token, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
 import { addMetadata, createToken, getMetadata, getMintInfo } from "../src";
 const { Keypair, Connection, clusterApiUrl, LAMPORTS_PER_SOL } = web3;
 
@@ -24,7 +18,7 @@ describe("spl token", () => {
     const walletKeyPair = Keypair.generate();
     const receiver = Keypair.generate();
     connection = new Connection(clusterApiUrl("devnet"));
-    wallet = new NodeWallet(walletKeyPair);
+    wallet = new Wallet(walletKeyPair);
     await connection.confirmTransaction(
       await connection.requestAirdrop(wallet.publicKey, LAMPORTS_PER_SOL)
     );

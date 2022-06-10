@@ -1,12 +1,11 @@
 import { Token } from "@solana/spl-token";
-import { Wallet } from "@metaplex/js";
 import {
   MetadataDataData,
   Metadata,
   CreateMetadata,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { TokenData } from "../types";
-import { web3 } from "@project-serum/anchor";
+import { web3, Wallet } from "@project-serum/anchor";
 import { addTxPayerAndHash, sendTx } from "../utils";
 const { Transaction } = web3;
 

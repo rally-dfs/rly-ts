@@ -1,7 +1,6 @@
 import assert from "assert";
 
-import { web3, Provider, BN } from "@project-serum/anchor";
-import { NodeWallet } from "@metaplex/js";
+import { web3, Provider, BN, Wallet } from "@project-serum/anchor";
 import {
   initializeLinearPriceCurve,
   executeSwap,
@@ -47,7 +46,7 @@ describe("token swap", () => {
     tokenSwapInfo = Keypair.generate();
     provider = new Provider(
       new Connection(clusterApiUrl("devnet")),
-      new NodeWallet(walletKeyPair),
+      new Wallet(walletKeyPair),
       {}
     );
     ({ connection, wallet } = provider);
@@ -148,7 +147,7 @@ describe("token swap", () => {
         initialTokenBLiquidity,
       },
       {
-        callerTokenBAccountOwner: new NodeWallet(tokenBAdmin),
+        callerTokenBAccountOwner: new Wallet(tokenBAdmin),
         adminAccountOwner: adminOwner.publicKey,
       }
     );
@@ -227,7 +226,7 @@ describe("token swap", () => {
         wallet,
         connection,
       },
-      { userTransferAuthorityOwner: new NodeWallet(tokenBAdmin) }
+      { userTransferAuthorityOwner: new Wallet(tokenBAdmin) }
     );
 
     await connection.confirmTransaction(tx);
@@ -290,7 +289,7 @@ describe("token swap", () => {
         wallet,
         connection,
       },
-      { userTransferAuthorityOwner: new NodeWallet(tokenBAdmin) }
+      { userTransferAuthorityOwner: new Wallet(tokenBAdmin) }
     );
 
     await connection.confirmTransaction(tx);

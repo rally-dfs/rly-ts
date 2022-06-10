@@ -1,7 +1,6 @@
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Program, web3, BN } from "@project-serum/anchor";
+import { Program, web3, BN, Wallet } from "@project-serum/anchor";
 import { config } from "../../../config";
-import { Wallet, NodeWallet } from "@metaplex/js";
 import {
   generateTokenMintInstructions,
   generateCreateTokenAccountInstructions,
@@ -10,7 +9,6 @@ import {
   partialSignTx,
   addTxPayerAndHash,
 } from "../../utils";
-import { JsonWebKey } from "crypto";
 
 const {
   accountLayout: { SWAP_ACCOUNT_SPACE },
@@ -63,7 +61,7 @@ interface initializeLinearPriceCurveParams {
 interface initializeLinearPriceCurveOpts {
   //if the owner of the caller tokenB account is not the caller wallet account include the tokenB owner wallet here
   //do not use if calling from web or mobile
-  callerTokenBAccountOwner?: NodeWallet;
+  callerTokenBAccountOwner?: Wallet;
   //if the owner of the fee token account and destination token account is not the caller wallet include the admin owner public key here
   adminAccountOwner?: web3.PublicKey;
 }

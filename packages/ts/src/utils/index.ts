@@ -1,6 +1,7 @@
 import { config } from "../../config";
-import { web3, BN, Provider } from "@project-serum/anchor";
+import { BN, Provider, Wallet, web3 } from "@project-serum/anchor";
 import * as BufferLayout from "@solana/buffer-layout";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
   u64,
   AccountLayout,
@@ -8,7 +9,6 @@ import {
   MintLayout,
   Token,
 } from "@solana/spl-token";
-import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Connection } from "@metaplex/js";
 const { PublicKey, SystemProgram, Keypair, sendAndConfirmRawTransaction } =
   web3;
@@ -155,10 +155,15 @@ export const getTokenSwapInfo = async (
   programId: web3.PublicKey
 ) => {
   const data = await loadAccount(connection, swapInfoPubKey, programId);
+
   const tokenSwapData = TokenSwapLayout.decode(data);
+  // @ts-ignore
+
   if (!tokenSwapData.isInitialized) {
     throw new Error(`Invalid token swap state`);
   }
+
+  // @ts-ignore
 
   if (!tokenSwapData.isInitialized) {
     throw new Error(`Invalid token swap state`);
@@ -169,36 +174,68 @@ export const getTokenSwapInfo = async (
     programId
   );
 
+  // @ts-ignore
+
   const poolToken = new PublicKey(tokenSwapData.tokenPool);
+  // @ts-ignore
+
   const feeAccount = new PublicKey(tokenSwapData.feeAccount);
+  // @ts-ignore
+
   const tokenAccountA = new PublicKey(tokenSwapData.tokenAccountA);
+  // @ts-ignore
+
   const tokenAccountB = new PublicKey(tokenSwapData.tokenAccountB);
+  // @ts-ignore
+
   const mintA = new PublicKey(tokenSwapData.mintA);
+  // @ts-ignore
+
   const mintB = new PublicKey(tokenSwapData.mintB);
+  // @ts-ignore
+
   const tokenProgramId = new PublicKey(tokenSwapData.tokenProgramId);
 
   const tradeFeeNumerator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.tradeFeeNumerator
   );
   const tradeFeeDenominator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.tradeFeeDenominator
   );
   const ownerTradeFeeNumerator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerTradeFeeNumerator
   );
   const ownerTradeFeeDenominator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerTradeFeeDenominator
   );
   const ownerWithdrawFeeNumerator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerWithdrawFeeNumerator
   );
   const ownerWithdrawFeeDenominator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.ownerWithdrawFeeDenominator
   );
+  // @ts-ignore
+
   const hostFeeNumerator = Numberu64.fromBuffer(tokenSwapData.hostFeeNumerator);
   const hostFeeDenominator = Numberu64.fromBuffer(
+    // @ts-ignore
+
     tokenSwapData.hostFeeDenominator
   );
+  // @ts-ignore
+
   const curveType = tokenSwapData.curveType;
 
   return {
@@ -364,5 +401,20 @@ export const sendTx = async (
   await wallet.signTransaction(transaction);
 
   const rawTx = transaction.serialize();
+
+  const { lastValidBlockHeight, signature, recentBlockhash } = transaction;
+
+  const confirmationStrategy: web3.BlockheightBasedTransactionConfimationStrategy =
+    {
+      lastValidBlockHeight,
+      signature: bs58.encode(signature),
+      blockhash: recentBlockhash,
+    };
+  await sendAndConfirmRawTransaction(
+    connection,
+    rawTx,
+    confirmationStrategy,
+    txOpts
+  );
   return await sendAndConfirmRawTransaction(connection, rawTx, txOpts);
 };

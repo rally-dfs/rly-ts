@@ -1,6 +1,5 @@
 import { Token, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
-import { Wallet } from "@metaplex/js";
-import { web3, Provider } from "@project-serum/anchor";
+import { web3, Wallet } from "@project-serum/anchor";
 import { addTxPayerAndHash, sendTx } from "../utils";
 const { Transaction } = web3;
 

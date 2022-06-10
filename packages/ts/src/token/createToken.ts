@@ -4,14 +4,13 @@ import {
   u64,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Wallet } from "@metaplex/js";
 import {
   MetadataDataData,
   Metadata,
   CreateMetadata,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { TokenData } from "../types";
-import { BN, web3, Provider } from "@project-serum/anchor";
+import { BN, web3, Wallet } from "@project-serum/anchor";
 import { generateTokenMintInstructions, sendTx } from "../utils";
 import { partialSignTx, addTxPayerAndHash } from "../utils";
 import { sendToken } from "@metaplex/js/lib/actions";

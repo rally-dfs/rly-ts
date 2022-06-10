@@ -3,8 +3,7 @@ const chai = require("chai");
 const expect = chai.expect;
 chai.use(require("chai-as-promised"));
 
-import { web3, Provider, BN } from "@project-serum/anchor";
-import { NodeWallet } from "@metaplex/js";
+import { web3, Provider, BN, Wallet } from "@project-serum/anchor";
 
 import {
   initializeLinearPriceCurve,
@@ -47,7 +46,7 @@ describe("test freeze", () => {
     tokenSwapInfo = Keypair.generate();
     provider = new Provider(
       new Connection(clusterApiUrl("devnet")),
-      new NodeWallet(walletKeyPair),
+      new Wallet(walletKeyPair),
       {}
     );
     ({ connection, wallet } = provider);

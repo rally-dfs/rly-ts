@@ -1,7 +1,6 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Program, web3, BN, Provider } from "@project-serum/anchor";
+import { Program, web3, BN, Wallet } from "@project-serum/anchor";
 import { config } from "../../../config";
-import { Wallet } from "@metaplex/js";
 import { addTxPayerAndHash, sendTx } from "../../utils";
 const {
   pda: { WRAPPED_TOKEN_OWNER_AUTHORITY_PDA_SEED, TOKEN_ACCOUNT_PDA_SEED },
