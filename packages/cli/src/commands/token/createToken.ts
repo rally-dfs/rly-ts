@@ -2,7 +2,7 @@ import { web3, BN, Wallet } from "@project-serum/anchor";
 const { Connection, clusterApiUrl } = web3;
 import { loadKeypair } from "../../utils/utils";
 
-import { createToken } from "rly-js";
+import { createToken } from "../../../../ts/src/token/createToken";
 
 export const createTokenCommand = async (options) => {
   // get values from options
@@ -15,6 +15,8 @@ export const createTokenCommand = async (options) => {
 
   //convert to decimal units
   supply = supply.mul(ten.pow(dec));
+
+  console.log("supply", supply.toString());
 
   // connect to cluster and load wallet
   const connection = new Connection(clusterApiUrl(env));

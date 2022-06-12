@@ -16,7 +16,7 @@ export const getTokenInfoCommand = async (mint, options) => {
     connection,
   });
   console.log("mint authority = ", mintInfo.mintAuthority.toBase58());
-  console.log("supply = ", mintInfo.supply.toNumber());
+  console.log("supply = ", mintInfo.supply.toString());
   console.log("name = ", data.name);
   console.log("symbol = ", data.symbol);
 };
