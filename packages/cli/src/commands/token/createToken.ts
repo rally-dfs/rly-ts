@@ -16,8 +16,6 @@ export const createTokenCommand = async (options) => {
   //convert to decimal units
   supply = supply.mul(ten.pow(dec));
 
-  console.log("supply", supply.toString());
-
   // connect to cluster and load wallet
   const connection = new Connection(clusterApiUrl(env));
   const wallet = new Wallet(loadKeypair(keypair));
