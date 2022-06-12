@@ -2,7 +2,7 @@ import { web3, BN, Wallet } from "@project-serum/anchor";
 const { Connection, clusterApiUrl } = web3;
 import { loadKeypair } from "../../utils/utils";
 
-import { createToken } from "../../../../ts/src/token/createToken";
+import { createToken } from "rly-js";
 
 export const createTokenCommand = async (options) => {
   // get values from options
