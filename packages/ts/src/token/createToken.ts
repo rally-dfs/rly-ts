@@ -90,7 +90,7 @@ export const createTokenTx = async (
     tokenAccount,
     walletPubKey,
     [],
-    u64.fromBuffer(initialSupply.toBuffer("be", 8))
+    u64.fromBuffer(initialSupply.toBuffer("le", 8))
   );
 
   // get metadata PDA
