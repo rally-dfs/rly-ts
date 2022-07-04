@@ -90,6 +90,7 @@ const InitTbc: FC = () => {
       });
 
       const tokenSwap = await tokenSwapProgram(provider);
+
       const callerTokenBAccount = await getAssociatedTokenAddress(
         new PublicKey(tokenB),
         wallet.publicKey
@@ -98,6 +99,8 @@ const InitTbc: FC = () => {
         tokenMint: new PublicKey(tokenB),
         connection,
       });
+
+      console.log(tokenBDecimals);
 
       const result = await initializeLinearPriceCurve({
         tokenSwap,

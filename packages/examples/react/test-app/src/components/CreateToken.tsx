@@ -9,9 +9,8 @@ import {
   Stack,
   Link,
 } from "@mui/material";
-import BN from "bn.js";
 import { createToken } from "rly-js";
-import { Wallet } from "@project-serum/anchor";
+import { Wallet, BN } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { EXPLORER_ROOT, NETWORK } from "../config";
 
