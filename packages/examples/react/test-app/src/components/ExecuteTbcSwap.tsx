@@ -19,9 +19,8 @@ import {
 } from "rly-js";
 import { PublicKey } from "@solana/web3.js";
 import { EXPLORER_ROOT, NETWORK } from "../config";
-import { AnchorProvider as Provider, Wallet } from "@project-serum/anchor";
-import BN from "bn.js";
 import { getAssociatedTokenAddress, baseToDec, decToBase } from "../utils";
+import { AnchorProvider as Provider, Wallet, BN } from "@project-serum/anchor";
 
 const ExecuteTbcSwap: FC = () => {
   const { connection } = useConnection();

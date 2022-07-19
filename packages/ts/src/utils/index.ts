@@ -355,8 +355,7 @@ export const addTxPayerAndHash = async (
   // add fee payer and recent block hash to tx
   transaction.feePayer = payer;
   const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash();
-
+    await connection.getLatestBlockhash("finalized");
   transaction.recentBlockhash = blockhash;
   transaction.lastValidBlockHeight = lastValidBlockHeight;
 

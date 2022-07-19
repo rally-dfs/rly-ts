@@ -18,6 +18,7 @@ import { TokenData } from "../types";
 import { BN, web3, Wallet } from "@project-serum/anchor";
 import { generateTokenMintInstructions, sendTx } from "../utils";
 import { partialSignTx, addTxPayerAndHash } from "../utils";
+import { text } from "stream/consumers";
 const { Transaction } = web3;
 
 interface createTokenTxResults {
@@ -90,7 +91,7 @@ export const createTokenTx = async (
     tokenAccount,
     walletPubKey,
     [],
-    u64.fromBuffer(initialSupply.toBuffer("le", 8))
+    u64.fromBuffer(initialSupply.toArrayLike(Buffer, "le", 8))
   );
 
   // get metadata PDA
