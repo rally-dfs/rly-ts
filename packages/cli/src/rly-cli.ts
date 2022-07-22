@@ -1,11 +1,13 @@
 #! /usr/bin/env node
 
 import { program } from "commander";
-program.version("0.0.9");
+program.version("0.0.10");
 
 import {
   createTokenCommand,
+  createMetadataUri,
   addMetadataCommand,
+  updateMetadataCommand,
   getTokenInfoCommand,
   freezeAccountCommand,
   getCanonicalBalanceCommand,
@@ -32,10 +34,25 @@ program
   .requiredOption("-s, --symbol <string>", "token symbol")
   .requiredOption("--supply <number>", "initial supply (integer value)")
   .option("-d, --dec <number>", "token decimals", "9")
+  .option("-u, --uri <string>", "metadata uri")
   .option("--no_freeze_authority", "no freeze authority")
   .option("-e, --env <string>", "Solana cluster env name", "devnet")
   .description("create a new spl token with metadata")
   .action(createTokenCommand);
+
+program
+  .command("create-metadata-uri")
+  .requiredOption(
+    "-ar, --arwallet <path>",
+    "ar wallet path",
+    "--arwallet not provided"
+  )
+  .requiredOption(
+    "-m, --metadata <path>",
+    `metadata json location`,
+    "--metadata-path not provided"
+  )
+  .action(createMetadataUri);
 
 program
   .command("add-metadata")
@@ -48,8 +65,24 @@ program
   .requiredOption("-n, --name <string>", "token name")
   .requiredOption("-s, --symbol <string>", "token symbol")
   .option("-e, --env <string>", "Solana cluster env name", "devnet")
+  .option("-u, --uri <string>", "metadata uri")
   .description("add metadata to an existing SPL token")
   .action(addMetadataCommand);
+
+program
+  .command("update-metadata")
+  .argument("<mint>", "token mint")
+  .requiredOption(
+    "-k, --keypair <path>",
+    `Solana wallet location`,
+    "--keypair not provided"
+  )
+  .requiredOption("-n, --name <string>", "token name")
+  .requiredOption("-s, --symbol <string>", "token symbol")
+  .option("-e, --env <string>", "Solana cluster env name", "devnet")
+  .option("-u, --uri <string>", "metadata uri")
+  .description("update metadata to an existing SPL token")
+  .action(updateMetadataCommand);
 
 program
   .command("get-token-info")

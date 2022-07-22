@@ -1,34 +1,40 @@
 import { Token } from "@solana/spl-token";
+import { TokenData } from "../types";
+import { web3, Wallet } from "@project-serum/anchor";
+import { config } from "../../config";
+import { addTxPayerAndHash, sendTx } from "../utils";
+
 import {
   DataV2,
-  CreateMetadataAccountV2InstructionAccounts,
-  CreateMetadataAccountArgsV2,
-  CreateMetadataAccountV2InstructionArgs,
-  createCreateMetadataAccountV2Instruction,
+  UpdateMetadataAccountV2InstructionAccounts,
+  UpdateMetadataAccountArgsV2,
+  UpdateMetadataAccountV2InstructionArgs,
+  createUpdateMetadataAccountV2Instruction,
   PROGRAM_ADDRESS,
 } from "@metaplex-foundation/mpl-token-metadata";
-import { TokenData } from "../types";
-import { config } from "../../config";
-import { web3, Wallet } from "@project-serum/anchor";
-import { addTxPayerAndHash, sendTx } from "../utils";
 const { Transaction, PublicKey } = web3;
 
-interface addMetadataTxParams {
+interface updateMetadataTxParams {
   tokenMint: Token;
   tokenData: TokenData;
   connection: web3.Connection;
   walletPubKey: web3.PublicKey;
 }
 
-interface addMetadataParams {
+interface updateMetadataParams {
   tokenMint: Token;
   tokenData: TokenData;
   connection: web3.Connection;
   wallet: Wallet;
 }
 
-export const addMetadataTx = async (
-  { tokenMint, tokenData, connection, walletPubKey } = {} as addMetadataTxParams
+export const updateMetadataTx = async (
+  {
+    tokenMint,
+    tokenData,
+    connection,
+    walletPubKey,
+  } = {} as updateMetadataTxParams
 ): Promise<web3.Transaction> => {
   const transaction = new Transaction();
 
@@ -55,35 +61,34 @@ export const addMetadataTx = async (
 
   const accounts = {
     metadata,
-    mint: tokenMint.publicKey,
-    mintAuthority: walletPubKey,
     updateAuthority: walletPubKey,
-    payer: walletPubKey,
-  } as CreateMetadataAccountV2InstructionAccounts;
+  } as UpdateMetadataAccountV2InstructionAccounts;
 
-  const createMetadataAccountArgsV2 = {
+  const updateMetadataAccountArgsV2 = {
     data,
+    updateAuthority: walletPubKey,
+    primarySaleHappened: false,
     isMutable: true,
-  } as CreateMetadataAccountArgsV2;
+  } as UpdateMetadataAccountArgsV2;
 
   const args = {
-    createMetadataAccountArgsV2,
-  } as CreateMetadataAccountV2InstructionArgs;
+    updateMetadataAccountArgsV2,
+  } as UpdateMetadataAccountV2InstructionArgs;
 
-  const createMetadataIx = createCreateMetadataAccountV2Instruction(
+  const updateMetadataIx = createUpdateMetadataAccountV2Instruction(
     accounts,
     args
   );
 
-  transaction.add(createMetadataIx);
+  transaction.add(updateMetadataIx);
   await addTxPayerAndHash(transaction, connection, walletPubKey);
   return transaction;
 };
 
-export const addMetadata = async (
-  { tokenMint, tokenData, connection, wallet } = {} as addMetadataParams
+export const updateMetadata = async (
+  { tokenMint, tokenData, connection, wallet } = {} as updateMetadataParams
 ): Promise<web3.TransactionSignature> => {
-  const transaction = await addMetadataTx({
+  const transaction = await updateMetadataTx({
     tokenMint,
     tokenData,
     connection,

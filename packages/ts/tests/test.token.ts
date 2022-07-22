@@ -30,7 +30,12 @@ describe("spl token", () => {
   it("should create a new spl token with metadata", async () => {
     ({ tx, tokenMint } = await createToken({
       initialSupply,
-      tokenData: { name, symbol, decimals },
+      tokenData: {
+        name,
+        symbol,
+        decimals,
+        uri: "https://arweave.net:443/fRgc2NeIGpeRcyHQ_cmJE-76AW7jYnTn8kPbiEMXOB",
+      },
       connection,
       wallet,
       freezeAuthority: true,
@@ -51,7 +56,12 @@ describe("spl token", () => {
   it("should create a new spl token with metadata and no freeze authority", async () => {
     ({ tx, tokenMint } = await createToken({
       initialSupply,
-      tokenData: { name, symbol, decimals },
+      tokenData: {
+        name,
+        symbol,
+        decimals,
+        uri: "https://arweave.net:443/fRgc2NeIGpeRcyHQ_cmJE-76AW7jYnTn8kPbiEMXOB",
+      },
       connection,
       wallet,
       freezeAuthority: false,
@@ -91,7 +101,12 @@ describe("spl token", () => {
 
     const tx = await addMetadata({
       tokenMint,
-      tokenData: { name, symbol, decimals },
+      tokenData: {
+        name,
+        symbol,
+        decimals,
+        uri: "https://arweave.net:443/fRgc2NeIGpeRcyHQ_cmJE-76AW7jYnTn8kPbiEMXOB",
+      },
       connection,
       wallet,
     });

@@ -7,7 +7,7 @@ import { createToken } from "rly-js";
 export const createTokenCommand = async (options) => {
   // get values from options
 
-  const { env, keypair, name, symbol, no_freeze_authority } = options;
+  const { env, keypair, name, symbol, uri, no_freeze_authority } = options;
   let { supply, dec } = options;
   const ten = new BN(10);
   dec = new BN(dec);
@@ -23,7 +23,7 @@ export const createTokenCommand = async (options) => {
   // create token
   const { tx, tokenMint, tokenAccount } = await createToken({
     initialSupply: supply,
-    tokenData: { name, symbol, decimals: dec },
+    tokenData: { name, symbol, decimals: dec, uri },
     connection,
     wallet,
     freezeAuthority: !no_freeze_authority,

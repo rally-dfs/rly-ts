@@ -18,7 +18,6 @@ import { TokenData } from "../types";
 import { BN, web3, Wallet } from "@project-serum/anchor";
 import { generateTokenMintInstructions, sendTx } from "../utils";
 import { partialSignTx, addTxPayerAndHash } from "../utils";
-import { text } from "stream/consumers";
 const { Transaction } = web3;
 
 interface createTokenTxResults {
@@ -112,7 +111,7 @@ export const createTokenTx = async (
   const data = {
     name: tokenData.name,
     symbol: tokenData.symbol,
-    uri: "",
+    uri: tokenData.uri,
     sellerFeeBasisPoints: null,
     creators: null,
     collection: null,

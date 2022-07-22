@@ -63,7 +63,12 @@ describe("canonical swap", () => {
       tokenAccount: canonicalTokenAccount,
     } = await createToken({
       initialSupply: initialCanSupply,
-      tokenData: { name, symbol, decimals },
+      tokenData: {
+        name,
+        symbol,
+        decimals,
+        uri: "https://arweave.net:443/fRgc2NeIGpeRcyHQ_cmJE-76AW7jYnTn8kPbiEMXOB",
+      },
       connection,
       wallet,
       freezeAuthority: false,
@@ -96,7 +101,12 @@ describe("canonical swap", () => {
       tokenAccount: wrappedTokenAccount,
     } = await createToken({
       initialSupply: initalWrappedSupply,
-      tokenData: { name, symbol, decimals },
+      tokenData: {
+        name,
+        symbol,
+        decimals,
+        uri: "https://arweave.net:443/fRgc2NeIGpeRcyHQ_cmJE-76AW7jYnTn8kPbiEMXOB",
+      },
       connection,
       wallet,
       freezeAuthority: false,
