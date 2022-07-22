@@ -9,7 +9,7 @@
             "ES6",
             "DOM"
         ],
-        "module": "commonjs",
+        "module": "CommonJs",
         "target": "ES6",
         "esModuleInterop": true,
         "resolveJsonModule": true
