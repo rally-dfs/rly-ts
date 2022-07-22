@@ -131,6 +131,7 @@ const ExecuteTbcSwap: FC = () => {
       connection,
       callerTokenBAccount
     );
+
     try {
       const { amountTokenAPostSwap, amountTokenBPostSwap } = await estimateSwap(
         {
@@ -152,7 +153,6 @@ const ExecuteTbcSwap: FC = () => {
 
       console.log(tokenBAccountInfo.amount.toString());
 
-      //console.log(amountTokenAPostSwap.toString())
       console.log(amountTokenBPostSwap.toString());
 
       return {

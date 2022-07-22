@@ -3,9 +3,9 @@ import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 const { Connection, clusterApiUrl, PublicKey } = web3;
 import { loadKeypair } from "../../utils/utils";
 
-import { addMetadata } from "rly-js";
+import { updateMetadata } from "rly-js";
 
-export const addMetadataCommand = async (mint, options) => {
+export const updateMetadataCommand = async (mint, options) => {
   // get values from options
   const { env, keypair, name, symbol, uri } = options;
 
@@ -23,13 +23,13 @@ export const addMetadataCommand = async (mint, options) => {
   );
 
   //add metdata to token
-  const tx = await addMetadata({
+  const tx = await updateMetadata({
     tokenMint,
     tokenData: { name, symbol, decimals: null, uri },
     connection,
     wallet,
   });
 
-  console.log(`metadata successfully added to ${mint}`);
+  console.log(`metadata successfully updated for ${mint}`);
   console.log(`tx sig = ${tx}`);
 };

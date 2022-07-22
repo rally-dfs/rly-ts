@@ -312,7 +312,7 @@ export const simulateTransaction = async (
   tx.feePayer = walletPubKey;
 
   tx.recentBlockhash = (
-    await connection.getLatestBlockhash(opts.preflightCommitment)
+    await connection.getLatestBlockhash("finalized")
   ).blockhash;
 
   const commitment = opts.commitment ?? "processed";
