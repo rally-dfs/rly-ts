@@ -61,8 +61,6 @@ const CreateToken: FC = () => {
       const { tokenName, tokenSymbol, tokenDecimals, initialSupply } =
         formValues;
 
-      console.log(wallet.publicKey);
-
       //convert init supply to decimal units
 
       const ten = new BN(10);
@@ -74,6 +72,7 @@ const CreateToken: FC = () => {
       const result = await createToken({
         initialSupply: supply,
         tokenData: {
+          uri: "gmbs stuff",
           name: tokenName,
           symbol: tokenSymbol,
           decimals: tokenDecimals,

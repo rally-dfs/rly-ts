@@ -47,16 +47,17 @@ describe("token swap", () => {
     const walletKeyPair = Keypair.generate();
     tokenBAdmin = Keypair.generate();
     tokenSwapInfo = Keypair.generate();
+
     provider = new Provider(
       new Connection(clusterApiUrl("devnet")),
       new Wallet(walletKeyPair),
       {}
     );
     ({ connection, wallet } = provider);
-    const { payer } = wallet;
     await connection.confirmTransaction(
       await connection.requestAirdrop(wallet.publicKey, LAMPORTS_PER_SOL)
     );
+    const { payer } = wallet;
 
     tokenA = await Token.createMint(
       connection,

@@ -381,23 +381,10 @@ export const sendTx = async (
   txOpts: web3.ConfirmOptions
 ) => {
   //sign tx with wallet
-  await wallet.signTransaction(transaction);
 
-  const rawTx = transaction.serialize();
+  const result = await wallet.signTransaction(transaction);
 
-  const { lastValidBlockHeight, signature, recentBlockhash } = transaction;
+  const rawTx = result.serialize();
 
-  const confirmationStrategy: web3.BlockheightBasedTransactionConfirmationStrategy =
-    {
-      lastValidBlockHeight,
-      signature: bs58.encode(signature),
-      blockhash: recentBlockhash,
-    };
-
-  return await sendAndConfirmRawTransaction(
-    connection,
-    rawTx,
-    confirmationStrategy,
-    txOpts
-  );
+  return await sendAndConfirmRawTransaction(connection, rawTx, null, txOpts);
 };
